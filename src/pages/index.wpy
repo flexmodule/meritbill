@@ -23,6 +23,7 @@
     </view>
 
     <panel>
+      <navigator url="/pages/home/index" hover-class="navigator-hover">跳转到首页</navigator>
       <view class="title" slot="title">测试数据绑定</view>
 
       <text class="info">{{normalTitle}}</text>
