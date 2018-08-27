@@ -8,6 +8,7 @@ page {
   position: relative;
   .homeback {
     position: absolute;
+    z-index: -6;
     width: 100%;
     height: 100%;
     image {
@@ -15,11 +16,94 @@ page {
       height: 100%;
     }
   }
+  .main {
+    .info {
+      position: absolute;
+      width: 100%;
+      bottom: 240rpx;
+      text-align: center;
+      height: 40rpx;
+      font: 30rpx/40rpx "";
+    }
+    .sellAdvan {
+      width: 400rpx;
+      height: 60rpx;
+      position: absolute;
+      bottom: 130rpx;
+      left: 0;
+      right: 0;
+      margin: auto;
+      background: #ffdb2f;
+      border: 4rpx solid #000;
+      font: 30rpx/60rpx "";
+      border-radius: 40rpx;
+      text-align: center;
+    }
+  }
+  .shadow {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 5;
+    background: rgba(0,0,0,.5);
+  }
+  .infoText {
+    background: #fff;
+    position: absolute;
+    z-index: 6;
+    width: 100%;
+    border-radius: 20rpx;
+    box-sizing: border-box;
+    top: 30rpx;
+    left: 0;
+    font: 30rpx/40rpx "";
+    padding: 60rpx 80rpx 40rpx;
+    .data {
+      margin: 10rpx 0;
+    }
+    .know {
+      width: 400rpx;
+      font: 24rpx/50rpx "";
+      background: #ffdb2f;
+      border-radius: 10rpx;
+      text-align: center;
+      margin: 20rpx auto;
+    }
+    .closeimg {
+      position: absolute;
+      right: 20rpx;
+      width: 60rpx;
+      height: 56rpx;
+      top: 20rpx;
+      image {
+        width: 100%;
+        height: 100%;
+      }
+    }
+  }
 }
 </style>
 <template>
   <view class="home">
     <view class="homeback"><image src="../../img/homeback.png"/></view>
+    <view class="main">
+      <view class="info" @tap="lookInfo">使用说明(点击可查看)</view>
+      <view class="sellAdvan">我要出售自己的优点</view>
+    </view>
+    <view class="shadow" wx:if="{{infoTextShow}}">
+      <view class="infoText">
+        <view class="closeimg" @tap="closeInfo"><image src="../../img/close.png"/></view>
+        <view class="data">1.本产品仅供朋友圈社交娱乐，并不是真正出售自身优点。</view>
+        <view class="data">2.本产品出售自身优点的用途，借着此平台让朋友圈更好的了解你，看看多少人喜欢你这个优点，多少人讨厌你的优点，在你贫穷落寞的时候，至少还有优点可以出售。</view>
+        <view class="data">3.如果其他用户购买你海报上的优点，金额是直接支付给你的，平台分成3%，以用于设计师优美的海报设计辛苦费以及开发人员辛苦费，剩余会全部转到你账户，提现不收取任何手续费。</view>
+        <view class="data">4.若本平台影响你的任何看法或者情绪，请见谅，毕竟没有十全十美的产品，我们会尽力改正。</view>
+        <view class="data">5.本平台愿景是多学习他人优点，不能自我膨胀，不能以本平台进行一些违法操作，否则后果自负，我们都是守法的好人民。</view>
+        <view class="data">6.本平台有反馈和投诉入口，正常情况下，都有客服进行处理。</view>
+        <view class="know" @tap="closeInfo">我知道了</view>
+      </view>
+    </view>
   </view>
 </template>
 <script>
@@ -27,20 +111,24 @@ import wepy from 'wepy';
 import request from '@/utils/request.js';
 export default class home extends wepy.page {
   data = {
-    storename: '',
+    infoTextShow: false,
   };
   components = {
    
   };
   methods = {
-    
+    lookInfo() {
+      this.infoTextShow=true;
+    },
+    closeInfo() {
+      this.infoTextShow=false;
+    }
   };
   getCommission() {
    
   }
   events = {};
   onLoad() {
-    this.getCommission();
   }
 }
 </script>

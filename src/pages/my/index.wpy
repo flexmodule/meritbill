@@ -2,10 +2,27 @@
 page {
   height: 100%;
 }
-
+.userinfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  .userinfo-avatar {
+    width: 80rpx;
+    height: 80rpx;
+    border-radius: 50%;
+  }
+  .userinfo-nickname {
+    color: #aaa;
+  }
+}
 </style>
 <template>
   <view class="my">
+    <view class="userinfo">
+      <open-data class="userinfo-avatar" type="userAvatarUrl"></open-data>
+      <open-data class="userinfo-nickname" type="userNickName"></open-data>
+    </view>
+    <button open-type="getUserInfo" lang="zh_CN" bindgetuserinfo="onGotUserInfo">获取用户信息</button>
     我的
     <navigator url="/pages/home/index" hover-class="navigator-hover">跳转到首页</navigator>
   </view>
@@ -15,20 +32,18 @@ import wepy from 'wepy';
 import request from '@/utils/request.js';
 export default class my extends wepy.page {
   data = {
-    storename: '',
+    storename: ''
   };
-  components = {
-   
-  };
-  methods = {
-    
-  };
-  getCommission() {
-   
-  }
+  components = {};
+  methods = {};
   events = {};
+  onGotUserInfo(e) {
+    console.log(e.detail)
+    console.log(e.detail.userInfo)
+    console.log(e.detail.rawData)
+  };
   onLoad() {
-    this.getCommission();
+   
   }
 }
 </script>
