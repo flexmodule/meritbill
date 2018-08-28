@@ -105,7 +105,7 @@ page {
       </view>
       <view class="footer-b">生成海报,售卖优点</view>
     </view>
-    <canvas canvas-id="shareCanvas" style="width:{{oWidth}},height:{{oHeight}}"></canvas>
+    <canvas canvas-id="shareCanvas" style="width:{{oWidth}};height:{{oHeight}}"></canvas>
   </view>
 </template>
 <script>
@@ -124,7 +124,9 @@ export default class poster extends wepy.page {
       {name: '演讲能力强', value: '演讲能力强'},
       {name: '会做饭', value: '会做饭'},
     ],
-    price: 0
+    price: 0,
+    oHeight: "",
+    oWidth: ""
   };
   components = {};
   methods = {
@@ -136,6 +138,15 @@ export default class poster extends wepy.page {
     }
   };
   events = {};
-  onLoad() {}
+  onLoad() {
+    try {
+      var res = wx.getSystemInfoSync();
+      this.oHeight = res.windowHeight+"px";
+      this.oWidth = res.windowWidth+"px";
+      this.$apply();
+    } catch (e) {
+      // Do something when catch error
+    }
+  }
 }
 </script>
