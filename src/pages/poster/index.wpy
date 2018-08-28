@@ -1,0 +1,141 @@
+<style lang="less">
+page {
+  height: 100%;
+}
+.poster {
+  .headimg {
+    padding: 20rpx;
+    .userinfo-avatar {
+      width: 120rpx;
+      height: 120rpx;
+      border-radius: 50%;
+      overflow: hidden;
+      display: block;
+      border: 1rpx solid #1cd7fe;
+    }
+  }
+  .main {
+    padding: 20rpx;
+    .title {
+      font: 38rpx/60rpx "";
+      margin-top: 20rpx;
+    }
+    .sex,.advan {
+      label {
+        margin: 0 18rpx 18rpx 0;
+        display: inline-block;
+        text {
+          font: 30rpx/30rpx "";
+          color: red;
+        }
+      }
+      checkbox {
+        zoom: 60%;
+        margin-right: 10rpx;
+        vertical-align: middle;
+      }
+    }
+  }
+  .footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    box-sizing: border-box;
+    height: 200rpx;
+    background: #fff;
+    border-top: 2rpx solid #1cd7fe;
+    box-shadow: 5rpx 5rpx 5rpx 0rpx #eee;
+    padding: 20rpx 0rpx;
+    .footer-t {
+      display: flex;
+      font-size: 0;
+      padding-left: 10rpx;
+      text {
+        font: 30rpx/50rpx "";
+        height: 30rpx;
+        display: inline-block;
+      }
+      input {
+        width: 100rpx;
+        height: 30rpx;
+        border: 1rpx solid #eee;
+        font: 30rpx/30rpx "";
+        padding: 0rpx 10rpx;
+        box-sizing: border-box;
+      }
+    }
+    .footer-b {
+      background: #1cd7fe;
+      width: 380rpx;
+      text-align: center;
+      border: 1rpx solid #eee;
+      font: 30rpx/80rpx "";
+      border-radius: 40rpx;
+      margin: 10rpx auto 0;
+    }
+  }
+}
+</style>
+<template>
+  <view class="poster">
+    <view class="headimg"><view class="userinfo-avatar"><open-data type="userAvatarUrl"></open-data></view></view>
+    <view class="main">
+      <view class="title">请选择您的性别：</view>
+      <view class="sex">
+        <checkbox-group bindchange="sexChange">
+          <label class="checkbox" wx:for="{{sexs}}" wx:key="{{item.name}}">
+            <checkbox value="{{item.name}}"/><text>{{item.value}}</text>
+          </label>
+        </checkbox-group>
+      </view>
+      <view class="title">请选择您准备出售的优点：</view>
+      <view class="advan">
+        <checkbox-group bindchange="advanChange">
+          <label class="checkbox" wx:for="{{advans}}" wx:key="{{item.name}}">
+            <checkbox value="{{item.name}}"/><text>{{item.value}}</text>
+          </label>
+        </checkbox-group>
+      </view>
+    </view>
+    <view class="footer">
+      <view class="footer-t">
+        <text>设置您每项优点的售卖价格：</text>
+        <input value="{{price}}"/>
+        <text>元/个</text>
+      </view>
+      <view class="footer-b">生成海报,售卖优点</view>
+    </view>
+    <canvas canvas-id="shareCanvas" style="width:{{oWidth}},height:{{oHeight}}"></canvas>
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+import request from '@/utils/request.js';
+export default class poster extends wepy.page {
+  data = {
+    sexs: [
+      {name: '男', value: '男'},
+      {name: '女', value: '女'}
+    ],
+    advans: [
+      {name: '会画画', value: '会画画'},
+      {name: '会弹吉他', value: '会弹吉他'},
+      {name: '空手道黑带', value: '空手道黑带'},
+      {name: '演讲能力强', value: '演讲能力强'},
+      {name: '会做饭', value: '会做饭'},
+    ],
+    price: 0
+  };
+  components = {};
+  methods = {
+    sexChange(e) {
+      console.log(e.detail.value)
+    },
+    advanChange(e) {
+      console.log(e.detail.value)
+    }
+  };
+  events = {};
+  onLoad() {}
+}
+</script>

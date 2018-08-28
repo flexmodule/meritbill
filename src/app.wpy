@@ -23,12 +23,16 @@ export default class extends wepy.app {
   config = {
     pages: [
       'pages/home/index',
-       'pages/my/index',
-       'pages/feedback/index'
+      'pages/my/index',
+      "pages/complain/index",
+      "pages/linktous/index",
+      "pages/mymoney/index",
+      "pages/order/index",
+      "pages/poster/index",
        ],
     window: {
       backgroundTextStyle: 'light',
-      navigationBarBackgroundColor: '#fff',
+      navigationBarBackgroundColor: '#1cd7fe',
       navigationBarTitleText: '麦优',
       navigationBarTextStyle: 'black'
     },
@@ -41,12 +45,6 @@ export default class extends wepy.app {
           iconPath: "img/home.png",
           selectedIconPath: "img/home.png",
           text: '首页'
-        },
-        {
-          pagePath: 'pages/feedback/index',
-          iconPath: "img/feedback.png",
-          selectedIconPath: "img/feedback.png",
-          text: '反馈'
         },
         {
           pagePath: 'pages/my/index',

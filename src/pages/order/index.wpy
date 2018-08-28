@@ -1,0 +1,66 @@
+<style lang="less">
+page {
+  height: 100%;
+}
+.order {
+  .orderList {
+    .data {
+      display: flex;
+      justify-content: space-between;
+      padding: 0 20rpx;
+      border-top: 1rpx solid #eee;
+      &:nth-last-child(2) {
+        border-bottom: 1rpx solid #eee;
+      }
+      .data-l {
+        font: 30rpx/40rpx "";
+      }
+      .data-r {
+        font: 40rpx/80rpx "";
+      }
+    }
+    .info {
+      text-align: center;
+      font: 24rpx/48rpx '';
+    }
+  }
+}
+</style>
+<template>
+  <view class="order">
+    <view class="orderList">
+      <scroll-view scroll-y lower-threshold="100px" bindscrolltolower="lower" enable-back-to-top="true">
+        <repeat for="{{orderListData}}" key="index" index="index" item="item">
+          <view class="data">
+            <view class="data-l">
+              <view class="name">{{item.name}}</view>
+              <view class="date">{{item.date}}</view>
+            </view>
+            <view class="data-r">+{{item.money}}</view>
+          </view>
+        </repeat>
+        <view class="info"><text wx:if="{{loadmore}}">加载中...</text><text wx:if="{{nomore}}">没有更多数据了</text></view>
+      </scroll-view>
+    </view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+import request from '@/utils/request.js';
+export default class order extends wepy.page {
+  data = {
+    orderListData: [{"name":"abc","date":"2018.8.28","money":"0"}],
+    loadmore: false,
+    nomore: false
+  };
+  components = {};
+  methods = {};
+  lower(e) {
+   
+    console.log(e);
+    
+  };
+  events = {};
+  onLoad() {}
+}
+</script>

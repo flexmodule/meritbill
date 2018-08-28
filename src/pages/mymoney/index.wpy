@@ -1,0 +1,57 @@
+<style lang="less">
+page {
+  height: 100%;
+}
+
+.mymoney {
+  position: relative;
+  .order {
+    position: absolute;
+    right: 18rpx;
+    font: 30rpx/50rpx "";
+  }
+  .money {
+    padding-top: 200rpx;
+    .moneyTitle {
+      font: 40rpx/80rpx "";
+      text-align: center;
+    }
+    .moneyNum {
+      font: 50rpx/80rpx "";
+      text-align: center;
+    }
+    .withdrawCash {
+      width: 500rpx;
+      font: 40rpx/80rpx "";
+      color: #fff;
+      background: green;
+      border-radius: 20rpx;
+      text-align: center;
+      margin: 50rpx auto 0;
+    }
+  }
+}
+</style>
+<template>
+  <view class="mymoney">
+    <navigator class="order" url="/pages/order/index" hover-class="none"><text>谁欣赏过你的优点(赞赏详情)</text></navigator>
+    <view class="money">
+      <view class="moneyTitle">我的零钱</view>
+      <view class="moneyNum">¥{{moneyNumValue}}</view>
+      <view class="withdrawCash">提现</view>
+    </view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+import request from '@/utils/request.js';
+export default class mymoney extends wepy.page {
+  data = {
+    moneyNumValue: 0
+  };
+  components = {};
+  methods = {};
+  events = {};
+  onLoad() {}
+}
+</script>

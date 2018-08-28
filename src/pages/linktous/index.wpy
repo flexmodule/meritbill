@@ -1,0 +1,67 @@
+<style lang="less">
+page {
+  height: 100%;
+}
+
+.linktous {
+  .title {
+    text-align: center;
+    font: 45rpx/80rpx "";
+    margin-bottom: 20rpx;
+  }
+  .main {
+    .data {
+      font: 30rpx/50rpx "";
+      padding: 20rpx;
+      border-top: 1rpx dashed #eee;
+      &:nth-last-child(1) {
+        border-bottom: 1rpx dashed #eee;
+      }
+      .img {
+        width: 40rpx;
+        height: 40rpx;
+        vertical-align: middle;
+        margin-right: 10rpx;
+      }
+    }
+  }
+  .footer {
+    font: 30rpx/40rpx "";
+    padding: 10rpx;
+    margin-top: 50rpx;
+  }
+}
+</style>
+<template>
+  <view class="linktous">
+    <view class="title">联系我们</view>
+    <view class="main">
+      <view class="data">
+        <view><image class="img" src="../../img/tel.png"/><text>电话(微信同号)：</text></view>
+        <view class="mobile">13296728295</view>
+      </view>
+      <view class="data">
+        <view><image class="img" src="../../img/wechat.png"/><text>微信号：</text></view>
+        <view class="mobile">wxid_wruh35ep8rmy22</view>
+      </view>
+      <view class="data">
+        <view><image class="img" src="../../img/qq.png"/><text>QQ号：</text></view>
+        <view class="mobile">719659784</view>
+      </view>
+    </view>
+    <view class="footer">温馨提示:客服在线时间:上午9:30-晚上12:00,非特殊情况，就会在线或者接听电话。</view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+import request from '@/utils/request.js';
+export default class linktous extends wepy.page {
+  data = {
+    storename: ''
+  };
+  components = {};
+  methods = {};
+  events = {};
+  onLoad() {}
+}
+</script>
