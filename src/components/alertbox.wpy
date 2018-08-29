@@ -1,0 +1,28 @@
+
+<style lang="less">
+</style>
+<template>
+  <view class="alertbox">
+    <view class="apply">申请获取以下权限</view>
+    <view class="applyList">获取您的公开信息(昵称，头像等)</view>
+    <button wx:if="{{canIUse}}" class="loginBtn" open-type="getUserInfo" bindgetuserinfo="getUserInfo">授权登录</button>
+    <view wx:else>请升级微信版本</view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+
+export default class Alertbox extends wepy.component {
+  components = {};
+  props = {};
+  data = {
+    canIUse: wx.canIUse('button.open-type.getUserInfo'),
+  };
+  methods = {};
+  getUserInfo(e) {
+    console.log(e.detail.userInfo)
+  };
+  events = {};
+  onLoad() {}
+}
+</script>
