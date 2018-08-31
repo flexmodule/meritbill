@@ -98,7 +98,7 @@ page {
         <view class="closeimg" @tap="closeInfo"><image src="../../img/close.png"/></view>
         <view class="data">1.本产品仅供朋友圈社交娱乐，借着此平台让朋友圈更好的了解你可以让朋友之间相互学习，取长补短。</view>
         <view class="data">2.若本平台影响你的任何看法或者情绪，请见谅，毕竟没有十全十美的产品，我们会尽力改正。</view>
-        <view class="data">3.本平台愿景是多学习他人优点，不能自我膨胀，不能以本平台进行一些违法操作，否则后果自负，我们都是守法的好人民。</view>
+        <view class="data">3.本平台愿景是多学习他人优点，不能自我膨胀，不能以本平台进行一些违法操作，否则后果自负。</view>
         <view class="data">4.本平台有反馈和投诉入口，正常情况下，都有客服进行处理。</view>
         <view class="data">5.本平台有任何侵权冒犯行为，请联系客服，立马做出调整。</view>
         <view class="data">6.望大家多多支持，共同进步。</view>

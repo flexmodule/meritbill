@@ -1,0 +1,107 @@
+<style lang="less">
+page {
+  height: 100%;
+}
+.praise {
+  .toHer {
+    padding-top: 50rpx;
+    .click {
+      width: 60rpx;
+      margin: 0 auto;
+      height: 60rpx;
+      border: 1rpx solid #eee;
+      text-align: center;
+      border-radius: 50%;
+      padding: 40rpx;
+      image {
+        width: 100%;
+        height: 100%;
+      }
+    }
+    .current {
+      margin-top: 30rpx;
+      padding: 10rpx 20rpx;
+      font: 40rpx/80rpx '';
+      text-align: center;
+      text {
+        font: 700 80rpx/80rpx '';
+        margin: 0 18rpx;
+      }
+    }
+  }
+  .messTo {
+    padding: 10rpx; 
+    box-sizing: border-box;
+    .messToTitle-t {
+      font: 40rpx/80rpx "";
+    }
+    textarea {
+      height: 200rpx;
+      width: 100%;
+      padding: 20rpx;
+      box-sizing: border-box;
+      background: #fff;
+      border: 1rpx solid #eee;
+    }
+    .info {
+      font: 30rpx/60rpx "";
+    }
+  }
+  .sub {
+    width: 418rpx;
+    background: #1cd7fe;
+    border-radius: 50rpx;
+    text-align: center;
+    font: 40rpx/80rpx "";
+    margin: 20rpx auto;
+  }
+}
+</style>
+<template>
+  <view class="praise">
+    <view class="toHer">
+      <view class="click" @tap="tap"><image wx:if="{{handShow}}" src="../../img/hand.png"/><image wx:else src="../../img/activehand.png"/></view>
+      <view class="current">
+        <view class="current-t">点击上图，为他/她助力</view>
+        <view class="current-b">已经有<text>{{peopleNum}}</text>人为她助力</view>
+      </view>
+    </view>
+    <view class="messTo">
+      <view class="messToTitle">
+        <view class="messToTitle-t">在她/他脱单的路上你想对他/她说:</view>
+      </view>
+      <textarea maxlength="200" placeholder="最多输入100字(可不填)" />
+      <view class="info">温馨提示：放心的说,本平台全是匿名留言,对方不知道你是谁,只知道留言的内容</view>
+    </view>
+    <view class="sub">确认为他/她助力</view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+import request from '@/utils/request.js';
+export default class praise extends wepy.page {
+  data = {
+    peopleNum: 20,
+    handShow: true,
+    bstop: true
+  };
+  components = {};
+  methods = {
+    tap() {
+      if (this.bstop) {
+        this.handShow = false;
+        this.peopleNum++;
+        this.bstop = false;
+      } else {
+      }
+    }
+  };
+  events = {};
+  onGotUserInfo(e) {
+    console.log(e.detail);
+    console.log(e.detail.userInfo);
+    console.log(e.detail.rawData);
+  }
+  onLoad() {}
+}
+</script>

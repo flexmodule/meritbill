@@ -28,6 +28,7 @@ export default class extends wepy.app {
       "pages/linktous/index",
       "pages/assistance/index",
       "pages/poster/index",
+      "pages/praise/index",
        ],
     window: {
       backgroundTextStyle: 'light',

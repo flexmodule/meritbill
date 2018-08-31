@@ -190,7 +190,7 @@ export default class poster extends wepy.page {
   events = {};
   makePoster(e) {
     this.name=e.detail.userInfo.nickName
-    console.log(e.detail.userInfo)
+    console.log(e)
     if (this.advansList !== "") {
       wx.showLoading({
         title: '正在生成...'
