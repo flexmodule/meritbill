@@ -1,0 +1,205 @@
+<style lang="less">
+page {
+  height: 100%;
+}
+
+.assistance {
+  .assistanceTitle {
+    font: 40rpx/80rpx '';
+    text-align: center;
+  }
+  .main {
+    padding: 36rpx;
+    .data {
+      .num {
+        font: 30rpx/50rpx '';
+      }
+    }
+  }
+  .mess {
+    padding: 20rpx;
+    .messTitle {
+      font: 30rpx/60rpx '';
+    }
+    .messList {
+      border: 4rpx dashed #1cd7fe;
+      padding: 0 10rpx;
+      border-radius: 10rpx;
+      background: #eee;
+      ::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+        color: transparent;
+      }
+    }
+    .messListBody {
+      font: 30rpx/68rpx '';
+      padding: 0 5px;
+      box-sizing: border-box;
+      border-bottom: 1rpx dashed #1cd7fe;
+      width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .info {
+      text-align: center;
+      font: 24rpx/48rpx '';
+    }
+  }
+  .footer {
+    position: fixed;
+    z-index: 99;
+    width: 100%;
+    bottom: 0;
+    height: 100rpx;
+    background: #fff;
+    border-top: 1rpx solid #1cd7fe;
+    .quickmake {
+      width: 398rpx;
+      font: 30rpx/68rpx '';
+      border-radius: 60rpx;
+      margin: 20rpx auto;
+      background: #1cd7fe;
+      text-align: center;
+    }
+  }
+  .alert {
+    position: fixed;
+    z-index: 100;
+    width: 500rpx;
+    left: 0;
+    right: 0;
+    top: 200rpx;
+    padding: 60rpx 30rpx 30rpx;
+    margin: auto;
+    border: 1rpx solid #eee;
+    border-radius: 20rpx;
+    background: #fff;
+    .closeimg {
+      position: absolute;
+      right: 20rpx;
+      width: 50rpx;
+      height: 46rpx;
+      top: 20rpx;
+      image {
+        width: 100%;
+        height: 100%;
+      }
+    }
+    .messDetail {
+      font: 30rpx/50rpx '';
+      height: 400rpx;
+      overflow-y: scroll;
+      &::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+        color: transparent;
+      }
+    }
+  }
+}
+</style>
+<template>
+  <view class="assistance">
+    <view class="assistanceTitle">助力脱单主力军分布</view>
+    <view class="main">
+      <view class="total data">
+        <view class="num"><text>你的总助力人数：</text><text>{{totalNum}}</text></view>
+        <view class="pro"><progress percent="{{percentNum}}" show-info stroke-width="16" color="#1cd7fe" active="true"/></view>
+      </view>
+      <view class="man data">
+        <view class="num"><text>男：</text><text>{{totalNum}}</text></view>
+        <view class="pro"><progress percent="{{percentNum}}" show-info stroke-width="16" color="#1cd7fe" active="true"/></view>
+      </view>
+      <view class="woman data">
+        <view class="num"><text>女：</text><text>{{totalNum}}</text></view>
+        <view class="pro"><progress percent="{{percentNum}}" show-info stroke-width="16" color="#1cd7fe" active="true"/></view>
+      </view>
+    </view>
+    <view class="mess">
+      <view class="messTitle">在你脱单的路上，你的匿名好友对你说：</view>
+      <view class="messList">
+        <scroll-view scroll-y style="height:{{oHeight}}px" lower-threshold="100px" bindscrolltolower="lower" enable-back-to-top="true">
+          <repeat for="{{messList}}" key="index" index="index" item="item">
+            <view class="messListBody" @tap="toDetail({{item.mess}})">{{item.mess}}</view>
+          </repeat>
+          <view class="info"><text wx:if="{{loadmore}}">加载中...</text><text wx:if="{{nomore}}">没有更多数据了</text></view>
+        </scroll-view>
+      </view>
+    </view>
+    <view class="footer">
+      <view class="quickmake">立即合成脱单战绩海报</view>
+    </view>
+    <view class="alert" wx:if="{{boxShow}}">
+      <view class="closeimg" @tap="closeInfo"><image src="../../img/close.png"/></view>
+      <view class="messDetail">{{messDetail}}</view>
+    </view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+import request from '@/utils/request.js';
+export default class assistance extends wepy.page {
+  data = {
+    totalNum: 0,
+    percentNum: 20,
+    messList: [
+      {
+        mess:
+          '你太帅了你太帅了你太你太帅了你太帅了你太你太帅了你太帅了你太你太帅了你太帅了你太你太帅了你太帅了你太你太帅了你太帅了你太你太帅了你太帅了你太你太帅了你太帅了你太你太帅了你太帅了你太你太帅了你太帅了你太你太帅了你太帅了你太你太帅了你太帅了你太你太帅了你太帅了你太你太帅了你太帅了你太你太帅了你太帅了你太你太帅了你太帅了你太你太帅了你太帅了你太你太帅了你太帅了你太'
+      },
+      { mess: '实力单身20年' },
+      { mess: '实力单身20年' },
+      { mess: '实力单身20年' },
+      { mess: '实力单身20年' },
+      { mess: '实力单身20年' },
+      { mess: '实力单身20年' },
+      { mess: '实力单身20年' },
+      { mess: '实力单身20年' },
+      { mess: '实力单身20年' },
+      { mess: '实力单身20年' }
+    ],
+    oHeight: '',
+    loadmore: false,
+    nomore: false,
+    params: {
+      pageNum: 1,
+      pageSize: 10,
+      end: false
+    },
+    boxShow: false,
+    messDetail: ''
+  };
+  components = {};
+  methods = {
+    toDetail(mess) {
+      this.messDetail = mess;
+      this.boxShow = true;
+    },
+    closeInfo() {
+      this.boxShow = false;
+    }
+  };
+  lower(e) {
+    var that = this;
+    console.log(e);
+    if (!this.params.end) {
+      that.loadmore = true;
+      that.getMessList();
+    }
+  }
+  getMessList() {}
+  events = {};
+  onLoad() {
+    var that = this;
+    try {
+      var res = wx.getSystemInfoSync();
+      this.oHeight = res.windowHeight - 330;
+      this.$apply();
+    } catch (e) {
+      // Do something when catch error
+    }
+  }
+}
+</script>

@@ -32,7 +32,7 @@ page {
           color: red;
         }
       }
-      checkbox {
+      checkbox,radio {
         zoom: 60%;
         margin-right: 10rpx;
         vertical-align: middle;
@@ -44,32 +44,14 @@ page {
     bottom: 0;
     width: 100%;
     box-sizing: border-box;
-    height: 200rpx;
+    height: 140rpx;
     background: #fff;
     border-top: 2rpx solid #1cd7fe;
     box-shadow: 5rpx 5rpx 5rpx 0rpx #eee;
     padding: 20rpx 0rpx;
-    .footer-t {
-      display: flex;
-      font-size: 0;
-      padding-left: 10rpx;
-      text {
-        font: 30rpx/50rpx '';
-        height: 30rpx;
-        display: inline-block;
-      }
-      input {
-        width: 100rpx;
-        height: 30rpx;
-        border: 1rpx solid #eee;
-        font: 30rpx/30rpx '';
-        padding: 0rpx 10rpx;
-        box-sizing: border-box;
-      }
-    }
     .footer-b {
       background: #1cd7fe;
-      width: 380rpx;
+      width: 500rpx;
       text-align: center;
       border: 1rpx solid #eee;
       font: 30rpx/80rpx '';
@@ -132,13 +114,13 @@ page {
     <view class="main">
       <view class="title">请选择您的性别：</view>
       <view class="sex">
-        <checkbox-group bindchange="sexChange">
-          <label class="checkbox" wx:for="{{sexs}}" wx:key="{{item.name}}">
-            <checkbox value="{{item.name}}"/><text>{{item.value}}</text>
+        <radio-group class="radio-group" bindchange="sexChange">
+          <label class="radio" wx:for="{{sexs}}" wx:key="{{item.name}}">
+            <radio value="{{item.name}}"/>{{item.value}}
           </label>
-        </checkbox-group>
+        </radio-group>
       </view>
-      <view class="title">请选择您准备出售的优点：</view>
+      <view class="title">请选择您脱单的实力：</view>
       <view class="advan">
         <checkbox-group bindchange="advanChange">
           <label class="checkbox" wx:for="{{advans}}" wx:key="{{item.name}}">
@@ -148,12 +130,7 @@ page {
       </view>
     </view>
     <view class="footer">
-      <view class="footer-t">
-        <text>设置您每项优点的售卖价格：</text>
-        <input value="{{price}}" @input="getPrice"/>
-        <text>元/个</text>
-      </view>
-      <button wx:if="{{canIUse}}" class="footer-b" open-type="getUserInfo" bindgetuserinfo="makePoster">生成海报,售卖优点</button>
+      <button wx:if="{{canIUse}}" class="footer-b" open-type="getUserInfo" bindgetuserinfo="makePoster">生成海报,show实力,win脱单</button>
     </view>
     <view class="canvas-box" wx:if="{{isShowCav}}" >
       <canvas canvas-id="shareCanvas" style="width:{{oWidth}}px;height:{{oHeight}}px"></canvas>
@@ -180,32 +157,40 @@ export default class poster extends wepy.page {
       { name: '会弹吉他', value: '会弹吉他' },
       { name: '空手道黑带', value: '空手道黑带' },
       { name: '演讲能力强', value: '演讲能力强' },
-      { name: '会做饭', value: '会做饭' }
+      { name: '会做饭', value: '会做饭' },
+      { name: '工作努力', value: '工作努力' },
+      { name: '有梦想，有抱负', value: '有梦想，有抱负' },
+      { name: '做事谨慎,不盲目', value: '做事谨慎,不盲目' },
+      { name: '大方，不拘谨', value: '大方，不拘谨' },
+      { name: '善良', value: '善良' },
+      { name: '贤惠', value: '贤惠' },
+      { name: '会打篮球', value: '会打篮球' },
+      { name: '会打乒乓球', value: '会打乒乓球' },
     ],
-    price: 0,
     oHeight: '',
     oWidth: '',
     isShowCav: false,
     headImg: '',
     authLogin: false,
     advansList: "",
-    rpa: ""
+    rpa: "",
+    sex: ""
   };
   components = {};
   methods = {
     sexChange(e) {
+      this.sex=e.detail.value;
       console.log(e.detail.value);
     },
     advanChange(e) {
       this.advansList = e.detail.value;
       console.log(e.detail.value);
     },
-    getPrice(e) {
-      this.price = e.detail.value;
-    }
   };
   events = {};
   makePoster(e) {
+    this.name=e.detail.userInfo.nickName
+    console.log(e.detail.userInfo)
     if (this.advansList !== "") {
       wx.showLoading({
         title: '正在生成...'
@@ -238,34 +223,43 @@ export default class poster extends wepy.page {
     ctx.save();
     let r = 60;
     let cx = 10;
-    let cy = 10;
+    let cy = 290;
     ctx.arc((cx + r)*rpx, (cy + r)*rpx, r*rpx, 0, 2 * Math.PI);
     ctx.clip();
-    console.log(that.headImg);
-    ctx.drawImage(that.headImg, 10*rpx, 10*rpx, 120*rpx, 120*rpx);
+    ctx.drawImage(that.headImg, 10*rpx, 290*rpx, 120*rpx, 120*rpx);
     ctx.restore();
     //绘制文字
-    ctx.fillStyle = '#ffdc36';
-    ctx.fillRect(134*rpx, 22*rpx, 230*rpx, 110*rpx);
     ctx.setTextAlign('left');
     ctx.font="italic small-caps bold 12px arial";
     ctx.setFontSize(20*rpx);
     ctx.fillStyle = '#2a358b';
-    ctx.fillText(`快向你的好友购买优点吧`, 140*rpx, 60*rpx);
-    ctx.fillText(`向她/他学习,取长补短哦！`, 140*rpx, 100*rpx);
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
+    // 将阴影向右移动15px，向上移动10px
+    ctx.shadowOffsetX = 8*rpx;
+    ctx.shadowOffsetY = 8*rpx;
+    // 轻微模糊阴影
+    ctx.shadowBlur = 8*rpx;
+    ctx.fillText(`哈哈,我是${that.name}`, 50*rpx, 60*rpx);
+    ctx.font="normal small-caps bold 12px arial";
+    ctx.setFontSize(26*rpx);
+    ctx.fillText(`喊你秀秀优点，一起脱单吧！`, 28*rpx, 100*rpx);
     let contentArray = that.advansList;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+    ctx.font="normal small-caps bold 12px arial";
+    ctx.shadowBlur = 0;
     ctx.setTextAlign('left');
     ctx.setFontSize(12*rpx);
     let contentHh = 10 * 1.3;
     for (let m = 0; m < contentArray.length; m++) {
       ctx.setFillStyle('#1cd7fe');
-      ctx.fillText(contentArray[m], 26*rpx, (180 + contentHh * m)*rpx);
-      ctx.fillRect(17*rpx, (175+ contentHh * m)*rpx, 6*rpx, 6*rpx);
+      ctx.fillText(contentArray[m], 26*rpx, (450 + contentHh * m)*rpx);
+      ctx.fillRect(17*rpx, (443+ contentHh * m)*rpx, 6*rpx, 6*rpx);
     }
-    //  绘制 出处
+    //绘制优点
     ctx.setTextAlign('left');
     ctx.setFontSize(15*rpx);
-    ctx.fillText(`出售优点项目:(现价:${that.price}元/个)`, 16*rpx, 160*rpx);
+    ctx.fillText(`show你脱单的实力:`, 16*rpx, 430*rpx);
     ctx.draw();
     setTimeout(function() {
       wx.canvasToTempFilePath({
