@@ -84,6 +84,46 @@ page {
       }
     }
   }
+  .shadow {
+    background: rgba(0, 0, 0, 0.3);
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 99;
+    height: 100%;
+  }
+  .alertbox {
+    width: 500rpx;
+    height: 270rpx;
+    border-radius: 20rpx;
+    background: #fff;
+    border: 1rpx solid #eee;
+    padding: 20rpx;
+    position: fixed;
+    z-index: 100;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+    .apply {
+      font: 40rpx/80rpx '';
+    }
+    .applyList {
+      font: 30rpx/80rpx '';
+      color: #999;
+    }
+    .loginBtn {
+      width: 400rpx;
+      background: green;
+      border-radius: 50rpx;
+      color: #fff;
+      text-align: center;
+      margin: 20rpx auto;
+      font: 30rpx/60rpx '';
+    }
+  }
 }
 </style>
 <template>
@@ -105,6 +145,14 @@ page {
         <view class="know" @tap="closeInfo">我知道了</view>
       </view>
     </view>
+    <view class="shadow" wx:if="{{authLogin}}">  
+      <view class="alertbox">
+        <view class="apply">申请获取以下权限</view>
+        <view class="applyList">获取您的公开信息(昵称，头像等)</view>
+        <button wx:if="{{canIUse}}" class="loginBtn" open-type="getUserInfo" bindgetuserinfo="getUserInfo">授权登录</button>
+        <view wx:else>请升级微信版本</view>
+      </view>
+    </view>
   </view>
 </template>
 <script>
@@ -113,6 +161,8 @@ import request from '@/utils/request.js';
 export default class home extends wepy.page {
   data = {
     infoTextShow: false,
+    authLogin: false,
+    canIUse: wx.canIUse('button.open-type.getUserInfo'),
   };
   components = {
    
@@ -128,8 +178,27 @@ export default class home extends wepy.page {
   getCommission() {
    
   }
+  getUserInfo(e) {
+    var that = this;
+    that.authLogin = false;
+    console.log(e.detail.userInfo);
+  }
   events = {};
   onLoad() {
+    var that = this;
+    wx.getSetting({
+      success: function(res) {
+        console.log(res);
+        if (res.authSetting['scope.userInfo']) {
+          // 已经授权，可以直接调用 getUserInfo 获取头像昵称
+          wx.getUserInfo({
+            success: function(res) {}
+          });
+        } else {
+          that.authLogin = true;
+        }
+      }
+    });
   }
 }
 </script>

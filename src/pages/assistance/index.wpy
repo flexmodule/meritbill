@@ -122,7 +122,7 @@ page {
       <view class="messList">
         <scroll-view scroll-y style="height:{{oHeight}}px" lower-threshold="100px" bindscrolltolower="lower" enable-back-to-top="true">
           <repeat for="{{messList}}" key="index" index="index" item="item">
-            <view class="messListBody" @tap="toDetail({{item.mess}})">{{item.mess}}</view>
+            <view class="messListBody" @tap="toDetail({{item.mess}})">{{index}}-{{item.mess}}</view>
           </repeat>
           <view class="info"><text wx:if="{{loadmore}}">加载中...</text><text wx:if="{{nomore}}">没有更多数据了</text></view>
         </scroll-view>

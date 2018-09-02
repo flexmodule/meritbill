@@ -66,46 +66,6 @@ page {
     width: 100%;
     left: 0;
   }
-  .shadow {
-    background: rgba(0, 0, 0, 0.3);
-    width: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 99;
-    height: 100%;
-  }
-  .alertbox {
-    width: 500rpx;
-    height: 270rpx;
-    border-radius: 20rpx;
-    background: #fff;
-    border: 1rpx solid #eee;
-    padding: 20rpx;
-    position: fixed;
-    z-index: 100;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    margin: auto;
-    .apply {
-      font: 40rpx/80rpx '';
-    }
-    .applyList {
-      font: 30rpx/80rpx '';
-      color: #999;
-    }
-    .loginBtn {
-      width: 400rpx;
-      background: green;
-      border-radius: 50rpx;
-      color: #fff;
-      text-align: center;
-      margin: 20rpx auto;
-      font: 30rpx/60rpx '';
-    }
-  }
 }
 </style>
 <template>
@@ -134,14 +94,6 @@ page {
     </view>
     <view class="canvas-box" wx:if="{{isShowCav}}" >
       <canvas canvas-id="shareCanvas" style="width:{{oWidth}}px;height:{{oHeight}}px"></canvas>
-    </view>
-    <view class="shadow" wx:if="{{authLogin}}">  
-      <view class="alertbox">
-        <view class="apply">申请获取以下权限</view>
-        <view class="applyList">获取您的公开信息(昵称，头像等)</view>
-        <button wx:if="{{canIUse}}" class="loginBtn" open-type="getUserInfo" bindgetuserinfo="getUserInfo">授权登录</button>
-        <view wx:else>请升级微信版本</view>
-      </view>
     </view>
   </view>
 </template>
@@ -189,6 +141,22 @@ export default class poster extends wepy.page {
   };
   events = {};
   makePoster(e) {
+    var options = { 
+      scene: "abc",
+      page: 'pages/praise/index', 
+      width: 430
+    };
+    request(
+      '/qrcode',
+      'get',
+      options,
+      '请求中',
+      function(res) {
+        console.log(res);
+        
+      },
+      function(err) {}
+    );
     this.name=e.detail.userInfo.nickName
     console.log(e)
     if (this.advansList !== "") {
@@ -309,19 +277,6 @@ export default class poster extends wepy.page {
     } catch (e) {
       // Do something when catch error
     }
-    wx.getSetting({
-      success: function(res) {
-        console.log(res);
-        if (res.authSetting['scope.userInfo']) {
-          // 已经授权，可以直接调用 getUserInfo 获取头像昵称
-          wx.getUserInfo({
-            success: function(res) {}
-          });
-        } else {
-          that.authLogin = true;
-        }
-      }
-    });
   }
 }
 </script>
