@@ -23,7 +23,7 @@ page {
       bottom: 240rpx;
       text-align: center;
       height: 40rpx;
-      font: 30rpx/40rpx "";
+      font: 30rpx/40rpx '';
     }
     .sellAdvan {
       width: 400rpx;
@@ -35,7 +35,7 @@ page {
       margin: auto;
       background: #ffdb2f;
       border: 4rpx solid #000;
-      font: 30rpx/60rpx "";
+      font: 30rpx/60rpx '';
       border-radius: 40rpx;
       text-align: center;
     }
@@ -47,7 +47,7 @@ page {
     top: 0;
     left: 0;
     z-index: 5;
-    background: rgba(0,0,0,.5);
+    background: rgba(0, 0, 0, 0.5);
   }
   .infoText {
     background: #fff;
@@ -58,7 +58,7 @@ page {
     box-sizing: border-box;
     top: 30rpx;
     left: 0;
-    font: 30rpx/40rpx "";
+    font: 30rpx/40rpx '';
     padding: 60rpx 80rpx 40rpx;
     overflow-y: scroll;
     .data {
@@ -66,7 +66,7 @@ page {
     }
     .know {
       width: 400rpx;
-      font: 24rpx/50rpx "";
+      font: 24rpx/50rpx '';
       background: #ffdb2f;
       border-radius: 10rpx;
       text-align: center;
@@ -162,26 +162,69 @@ export default class home extends wepy.page {
   data = {
     infoTextShow: false,
     authLogin: false,
-    canIUse: wx.canIUse('button.open-type.getUserInfo'),
+    canIUse: wx.canIUse('button.open-type.getUserInfo')
   };
-  components = {
-   
-  };
+  components = {};
   methods = {
     lookInfo() {
-      this.infoTextShow=true;
+      this.infoTextShow = true;
     },
     closeInfo() {
-      this.infoTextShow=false;
+      this.infoTextShow = false;
     }
   };
-  getCommission() {
-   
-  }
+  getCommission() {}
   getUserInfo(e) {
     var that = this;
-    that.authLogin = false;
-    console.log(e.detail.userInfo);
+    if (e.detail.userInfo) {
+      that.authLogin = false;
+      that.$parent.getAuthKey().then(resOpenid => {
+        var data = {
+          openid: resOpenid,
+          nickName: e.detail.userInfo.nickName,
+          avatarUrl: e.detail.userInfo.avatarUrl,
+          province: e.detail.userInfo.province,
+          city: e.detail.userInfo.city
+        };
+        request(
+          '/userinfo',
+          'post',
+          data,
+          '请求中',
+          function(res) {
+            console.log(res);
+            that.queryUsreInfo(resOpenid);
+          },
+          function(err) {}
+        );
+      });
+    } else {
+      wx.showModal({
+        title: '警告',
+        content: '您点击了拒绝授权，将无法进入小程序，请授权之后再进入!!!',
+        showCancel: false,
+        confirmText: '返回授权',
+        success: function(res) {
+          if (res.confirm) {
+            console.log('用户点击了“返回授权”');
+          }
+        }
+      });
+    }
+  }
+  queryUsreInfo(openid) {
+    var that = this;
+    request(
+      '/queryuserinfo',
+      'post',
+      { openid: openid },
+      '请求中',
+      function(res) {
+        console.log(res);
+        that.$parent.globalData.userInfo = res;
+      },
+      function(err) {}
+    );
   }
   events = {};
   onLoad() {
@@ -191,8 +234,8 @@ export default class home extends wepy.page {
         console.log(res);
         if (res.authSetting['scope.userInfo']) {
           // 已经授权，可以直接调用 getUserInfo 获取头像昵称
-          wx.getUserInfo({
-            success: function(res) {}
+          that.$parent.getAuthKey().then(resOpenid => {
+            that.queryUsreInfo(resOpenid);
           });
         } else {
           that.authLogin = true;

@@ -67,7 +67,11 @@ export default class extends wepy.app {
   }
 
   onLaunch() {
+
+  }
+  getAuthKey() {
     var that = this;
+    return new Promise(function (resolve, reject) {
     var codeText = {};
     wx.login({
       success: res => {
@@ -79,12 +83,16 @@ export default class extends wepy.app {
           '请求中',
           function(res) {
             that.globalData.openid=res.openid;
+            resolve(res.openid);
           },
-          function(err) {}
+          function(err) {
+            reject(err);
+          }
         );
       }
     });
-  }
+    })
+  };
   getUserInfo(cb) {
     const that = this;
     if (this.globalData.userInfo) {
