@@ -175,16 +175,23 @@ export default class home extends wepy.page {
   };
   getCommission() {}
   getUserInfo(e) {
+    console.log(e)
     var that = this;
     if (e.detail.userInfo) {
-      that.authLogin = false;
       that.$parent.getAuthKey().then(resOpenid => {
+        var sex
+        if(e.detail.userInfo.gender==1) {
+          sex="男"
+        } else {
+          sex="女"
+        }
         var data = {
           openid: resOpenid,
           nickName: e.detail.userInfo.nickName,
           avatarUrl: e.detail.userInfo.avatarUrl,
           province: e.detail.userInfo.province,
-          city: e.detail.userInfo.city
+          city: e.detail.userInfo.city,
+          sex: sex
         };
         request(
           '/userinfo',
@@ -192,7 +199,6 @@ export default class home extends wepy.page {
           data,
           '请求中',
           function(res) {
-            console.log(res);
             that.queryUsreInfo(resOpenid);
           },
           function(err) {}
@@ -213,6 +219,7 @@ export default class home extends wepy.page {
     }
   }
   queryUsreInfo(openid) {
+    this.$parent.globalData.openid=openid;
     var that = this;
     request(
       '/queryuserinfo',
@@ -221,7 +228,9 @@ export default class home extends wepy.page {
       '请求中',
       function(res) {
         console.log(res);
+        that.authLogin = false;
         that.$parent.globalData.userInfo = res;
+        that.$apply();
       },
       function(err) {}
     );
@@ -239,6 +248,7 @@ export default class home extends wepy.page {
           });
         } else {
           that.authLogin = true;
+          that.$apply();
         }
       }
     });

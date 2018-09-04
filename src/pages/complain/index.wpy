@@ -11,7 +11,7 @@ page {
   .main {
     padding: 20rpx;
     .checkbox {
-      font: 30rpx/40rpx "";
+      font: 30rpx/40rpx '';
       checkbox {
         zoom: 70%;
         margin-right: 10rpx;
@@ -25,7 +25,7 @@ page {
       box-sizing: border-box;
       background: #fff;
       padding: 10rpx;
-      font: 30rpx/40rpx "";
+      font: 30rpx/40rpx '';
     }
   }
   .link {
@@ -73,7 +73,7 @@ page {
     </view>
     <view class="title">请填写建议(选填)</view>
     <view class="inputData">
-      <textarea placeholder="在此填写您的建议" @input="getText" value="{{advice}}"/>
+      <textarea maxlength="200" placeholder="最多输入100字(可不填)" @input="getText" value="{{advice}}"/>
     </view>
     <view class="link">
       <text class="linkTitle">请填写您的手机号</text>
@@ -83,7 +83,7 @@ page {
       <text class="linkTitle">或者填写您的QQ号，方便我们联系您</text>
       <view class="qq"><text>QQ</text><input placeholder="选填" @input="getValue('qq')" value="{{qqValue}}"/></view>
     </view>
-    <view class="sureSub">确认提交</view>
+    <view class="sureSub" @tap="tapSub">确认提交</view>
   </view>
 </template>
 <script>
@@ -99,27 +99,80 @@ export default class complain extends wepy.page {
       { name: '恶意营销', value: '恶意营销' },
       { name: '隐私信息搜集', value: '隐私信息搜集' }
     ],
-    mobileValue: "",
-    wechatValue: "",
-    qqValue: "",
-    advice: ""
+    mobileValue: '',
+    wechatValue: '',
+    qqValue: '',
+    advice: '',
+    reasons: ''
   };
   components = {};
   methods = {
+    tapSub() {
+      var that = this;
+      var data = {};
+      data.outopenid = that.$parent.globalData.openid;
+      data.reasons = JSON.stringify(this.reasons);
+      data.advice = this.advice;
+      data.tel = this.mobileValue;
+      data.wechat = this.wechatValue;
+      data.qq = this.qqValue;
+      request(
+        '/advice/getadvice',
+        'post',
+        data,
+        '请求中',
+        function(res) {
+          console.log(res);
+          if (res == true) {
+            that.items.forEach(ele => {
+              ele.checked=false;
+            });
+            that.mobileValue = "";
+            that.wechatValue = "";
+            that.qqValue = "";
+            that.advice = "";
+            that.reasons = "";
+            wx.showToast({
+              title: '提交成功',
+              icon: 'none',
+              duration: 500
+            });
+            that.$apply();
+          } else {
+            that.items.forEach(ele => {
+              ele.checked=false;
+            });
+            that.mobileValue = "";
+            that.wechatValue = "";
+            that.qqValue = "";
+            that.advice = "";
+            that.reasons = "";
+            wx.showToast({
+              title: '提交失败',
+              icon: 'none',
+              duration: 500
+            });
+            that.$apply();
+          }
+        },
+        function(err) {}
+      );
+    },
     checkboxChange(e) {
+      this.reasons = e.detail.value;
       console.log(e.detail.value);
     },
     getText(e) {
-      this.advice=e.detail.value;
-      console.log(this.advice)
+      this.advice = e.detail.value;
+      console.log(this.advice);
     },
-    getValue(data,e) {
-      if(data=="mobile") {
-        this.mobileValue=e.detail.value
-      } else if (data=="wechat") {
-        this.wechatValue=e.detail.value
-      } else if (data=="wechat") {
-        this.qqValue=e.detail.value
+    getValue(data, e) {
+      if (data == 'mobile') {
+        this.mobileValue = e.detail.value;
+      } else if (data == 'wechat') {
+        this.wechatValue = e.detail.value;
+      } else if (data == 'qq') {
+        this.qqValue = e.detail.value;
       }
     }
   };
