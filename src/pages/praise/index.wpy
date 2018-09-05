@@ -111,7 +111,7 @@ page {
       <view class="messToTitle">
         <view class="messToTitle-t">在她/他脱单的路上,你想对他/她说:</view>
       </view>
-      <textarea maxlength="200" placeholder="最多输入100字(可不填)" value="{{message}}" @input="getMess"/>
+      <textarea maxlength="100" placeholder="最多输入50字(可不填)" value="{{message}}" @input="getMess"/>
       <view class="info">温馨提示：大胆放心的说,本平台全是匿名留言,对方不知道你是谁,只知道留言的内容</view>
     </view>
     <view class="sub" @tap="sureHelp">提交,确认为他/她助力</view>
@@ -136,40 +136,86 @@ export default class praise extends wepy.page {
     bstop: true,
     authLogin: false,
     canIUse: wx.canIUse('button.open-type.getUserInfo'),
-    inopenid: "",
-    message: ""
+    inopenid: '',
+    message: '',
+    mannum: 0,
+    womannum: 0
   };
   components = {};
   methods = {
     getMess(e) {
-      this.message=e.detail.value
+      this.message = e.detail.value;
+    },
+    updateNum(options) {
+      request( 
+        '/updatenum',
+        'post',
+        options,
+        '请求中',
+        function(res) {
+          if (res.serverStatus && res.serverStatus == 2) {
+            wx.showToast({
+              title: '助力成功',
+              icon: 'none',
+              duration: 500
+            });
+            that.$apply();
+          } else {
+            wx.showToast({
+              title: '助力失败',
+              icon: 'none',
+              duration: 500
+            });
+            that.$apply();
+          }
+        },
+        function(err) {}
+      );
     },
     sureHelp() {
-      var that=this
-      var data={
+      var that = this;
+      var data = {
         inopenid: that.inopenid,
         totalnum: that.peopleNum,
-        mannum: "",
-        womannum: "",
         message: that.message,
-        outopenid: ""
+        outopenid: that.$parent.globalData.userInfo.openid
+      };
+      var options={
+        openid: that.inopenid,
+        totalnum: that.peopleNum,
+        man: that.mannum,
+        woman: that.womannum,
       }
-      request(
-          '/gethelp',
-          'post',
-          data,
-          '请求中',
-          function(res) {
-            that.queryUsreInfo(resOpenid);
-          },
-          function(err) {}
-        );
+      request( 
+        '/gethelp',
+        'post',
+        data,
+        '请求中',
+        function(res) {
+          if (res.serverStatus && res.serverStatus == 2) {
+            that.updateNum(options);
+          } else {
+            wx.showToast({
+              title: '助力失败',
+              icon: 'none',
+              duration: 500
+            });
+            that.$apply();
+          }
+        },
+        function(err) {}
+      );
     },
     tap() {
       if (this.bstop) {
         this.handShow = false;
         this.peopleNum++;
         this.bstop = false;
+        if (that.$parent.globalData.userInfo.sex == '男') {
+          this.mannum++;
+        } else {
+          this.womannum++;
+        }
       } else {
       }
     },
@@ -224,16 +270,18 @@ export default class praise extends wepy.page {
     }
   }
   getNum(openid) {
-    var that=this
+    var that = this;
     request(
       '/userhelp/getnum',
       'post',
       { openid: openid },
       '请求中',
       function(res) {
-        console.log(res)
-        if(res.openid) {
-          that.peopleNum=res.totalNum;
+        console.log(res);
+        if (res.openid) {
+          that.peopleNum = res.totalNum;
+          that.mannum = res.man;
+          that.womannum = res.woman;
           that.$apply();
         }
       },
@@ -262,7 +310,7 @@ export default class praise extends wepy.page {
   }
   events = {};
   onLoad(options) {
-    this.inopenid=decodeURIComponent(options.scene);
+    this.inopenid = decodeURIComponent(options.scene);
     this.$apply();
     var that = this;
     wx.getSetting({

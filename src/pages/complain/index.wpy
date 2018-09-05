@@ -73,7 +73,7 @@ page {
     </view>
     <view class="title">请填写建议(选填)</view>
     <view class="inputData">
-      <textarea maxlength="200" placeholder="最多输入100字(可不填)" @input="getText" value="{{advice}}"/>
+      <textarea maxlength="100" placeholder="最多输入500字(可不填)" @input="getText" value="{{advice}}"/>
     </view>
     <view class="link">
       <text class="linkTitle">请填写您的手机号</text>
@@ -123,7 +123,7 @@ export default class complain extends wepy.page {
         '请求中',
         function(res) {
           console.log(res);
-          if (res == true) {
+          if (res.serverStatus&& res.serverStatus== 2) {
             that.items.forEach(ele => {
               ele.checked=false;
             });

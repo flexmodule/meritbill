@@ -109,20 +109,20 @@ page {
         <view class="pro"><progress percent="{{percentNum}}" show-info stroke-width="16" color="#1cd7fe" active="true"/></view>
       </view>
       <view class="man data">
-        <view class="num"><text>男：</text><text>{{totalNum}}</text></view>
-        <view class="pro"><progress percent="{{percentNum}}" show-info stroke-width="16" color="#1cd7fe" active="true"/></view>
+        <view class="num"><text>男：</text><text>{{manNum}}</text></view>
+        <view class="pro"><progress percent="{{percentManNum}}" show-info stroke-width="16" color="#1cd7fe" active="true"/></view>
       </view>
       <view class="woman data">
-        <view class="num"><text>女：</text><text>{{totalNum}}</text></view>
-        <view class="pro"><progress percent="{{percentNum}}" show-info stroke-width="16" color="#1cd7fe" active="true"/></view>
+        <view class="num"><text>女：</text><text>{{womanNum}}</text></view>
+        <view class="pro"><progress percent="{{percentWomanNum}}" show-info stroke-width="16" color="#1cd7fe" active="true"/></view>
       </view>
     </view>
     <view class="mess">
       <view class="messTitle">在你脱单的路上，你的匿名好友对你说：</view>
       <view class="messList">
         <scroll-view scroll-y style="height:{{oHeight}}px" lower-threshold="100px" bindscrolltolower="lower" enable-back-to-top="true">
-          <repeat for="{{messList}}" key="index" index="index" item="item">
-            <view class="messListBody" @tap="toDetail({{item.mess}})">{{index}}-{{item.mess}}</view>
+          <repeat for="{{messListData}}" key="index" index="index" item="item">
+            <view class="messListBody" @tap="toDetail({{item.message}})">{{index}}-{{item.message}}</view>
           </repeat>
           <view class="info"><text wx:if="{{loadmore}}">加载中...</text><text wx:if="{{nomore}}">没有更多数据了</text></view>
         </scroll-view>
@@ -143,23 +143,12 @@ import request from '@/utils/request.js';
 export default class assistance extends wepy.page {
   data = {
     totalNum: 0,
-    percentNum: 20,
-    messList: [
-      {
-        mess:
-          '你太帅了你太帅了你太你太帅了你太帅了你太你太帅了你太帅了你太你太帅了你太帅了你太你太帅了你太帅了你太你太帅了你太帅了你太你太帅了你太帅了你太你太帅了你太帅了你太你太帅了你太帅了你太你太帅了你太帅了你太你太帅了你太帅了你太你太帅了你太帅了你太你太帅了你太帅了你太你太帅了你太帅了你太你太帅了你太帅了你太你太帅了你太帅了你太你太帅了你太帅了你太你太帅了你太帅了你太'
-      },
-      { mess: '实力单身20年' },
-      { mess: '实力单身20年' },
-      { mess: '实力单身20年' },
-      { mess: '实力单身20年' },
-      { mess: '实力单身20年' },
-      { mess: '实力单身20年' },
-      { mess: '实力单身20年' },
-      { mess: '实力单身20年' },
-      { mess: '实力单身20年' },
-      { mess: '实力单身20年' }
-    ],
+    percentNum: 100,
+    percentManNum: 0,
+    percentWomanNum: 0,
+    manNum: 0,
+    womanNum: 0,
+    messListData: [],
     oHeight: '',
     loadmore: false,
     nomore: false,
@@ -186,13 +175,93 @@ export default class assistance extends wepy.page {
     console.log(e);
     if (!this.params.end) {
       that.loadmore = true;
-      that.getMessList();
+      that.getMessList(this.$parent.globalData.openid);
     }
   }
-  getMessList() {}
+  getNumDetail(openid) {
+    var that = this;
+    request(
+      '/userhelp/getnum',
+      'post',
+      { openid: openid },
+      '请求中',
+      function(res) {
+        console.log(res);
+        if (res.length != 0) {
+          that.totalNum = res[0].totalNum;
+          that.manNum = res[0].man;
+          that.womanNum = res[0].woman;
+          that.percentManNum = that.manNum / that.totalNum * 100;
+          that.percentWomanNum = (1 - that.manNum / that.totalNum) * 100;
+          that.$apply();
+        } else if (res == '') {
+          wx.showToast({
+            title: '暂无好友助你脱单',
+            icon: 'none',
+            duration: 500
+          });
+        } else {
+          wx.showToast({
+            title: '获取数据失败',
+            icon: 'none',
+            duration: 500
+          });
+        }
+      },
+      function(err) {
+        console.log(err);
+      }
+    );
+  }
+  getMessList(openid) {
+    var that = this;
+    request(
+      '/userhelp/gethelpdata',
+      'post',
+      { openid: openid },
+      '请求中',
+      function(res) {
+        console.log(res);
+        if (res.length != 0) {
+          let messlist = res;
+          messlist.forEach((order, i) => {
+            that.messListData.push(order);
+          });
+          that.loadmore = false;
+          if (messlist.length < that.params.pageSize) {
+            that.nomore = true;
+            that.loadmore = false;
+            that.params.end = true;
+          } else {
+            that.params.pageNum++;
+          }
+        } else if (res == '') {
+          wx.showToast({
+            title: '暂无数据',
+            icon: 'none',
+            duration: 500
+          });
+        } else {
+          wx.showToast({
+            title: '获取数据失败',
+            icon: 'none',
+            duration: 500
+          });
+        }
+        that.$apply();
+      },
+      function(err) {
+        console.log(err);
+      }
+    );
+  }
   events = {};
   onLoad() {
     var that = this;
+    that.$parent.getAuthKey().then(resOpenid => {
+      that.getMessList(resOpenid);
+      that.getNumDetail(resOpenid);
+    });
     try {
       var res = wx.getSystemInfoSync();
       this.oHeight = res.windowHeight - 330;
