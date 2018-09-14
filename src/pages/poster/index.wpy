@@ -142,7 +142,7 @@ export default class poster extends wepy.page {
   events = {};
   makePoster(e) {
     var options = { 
-      scene: "abc",
+      scene: "abcaaaaa",
       page: 'pages/praise/index', 
       width: 430
     };
