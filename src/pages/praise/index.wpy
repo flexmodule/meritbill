@@ -310,7 +310,7 @@ export default class praise extends wepy.page {
   }
   events = {};
   onLoad(options) {
-    this.inopenid = decodeURIComponent(options.scene);
+    this.inopenid = decodeURIComponent(options.openid);
     this.$apply();
     var that = this;
     wx.getSetting({

@@ -58,7 +58,7 @@ export default class extends wepy.app {
 
   globalData = {
     userInfo: null,
-    openid: 0
+    openid: ""
   };
 
   constructor() {
@@ -67,32 +67,32 @@ export default class extends wepy.app {
   }
 
   onLaunch() {
-
+    
   }
   getAuthKey() {
     var that = this;
-    return new Promise(function (resolve, reject) {
-    var codeText = {};
-    wx.login({
-      success: res => {
-        codeText.code = res.code;
-        request(
-          '/getopenid',
-          'post',
-          codeText,
-          '请求中',
-          function(res) {
-            that.globalData.openid=res.openid;
-            resolve(res.openid);
-          },
-          function(err) {
-            reject(err);
-          }
-        );
-      }
+    return new Promise(function(resolve, reject) {
+      var codeText = {};
+      wx.login({
+        success: res => {
+          codeText.code = res.code;
+          request(
+            '/getopenid',
+            'post',
+            codeText,
+            '请求中',
+            function(res) {
+              that.globalData.openid = res.openid;
+              resolve(res.openid);
+            },
+            function(err) {
+              reject(err);
+            }
+          );
+        }
+      });
     });
-    })
-  };
+  }
   getUserInfo(cb) {
     const that = this;
     if (this.globalData.userInfo) {

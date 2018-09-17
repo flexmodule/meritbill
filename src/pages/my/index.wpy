@@ -133,15 +133,15 @@ export default class my extends wepy.page {
   methods = {};
   events = {};
   getUserInfo(e) {
-    console.log(e)
+    console.log(e);
     var that = this;
     if (e.detail.userInfo) {
       that.$parent.getAuthKey().then(resOpenid => {
-        var sex
-        if(e.detail.userInfo.gender==1) {
-          sex="男"
+        var sex;
+        if (e.detail.userInfo.gender == 1) {
+          sex = '男';
         } else {
-          sex="女"
+          sex = '女';
         }
         var data = {
           openid: resOpenid,
@@ -200,9 +200,13 @@ export default class my extends wepy.page {
         console.log(res);
         if (res.authSetting['scope.userInfo']) {
           // 已经授权，可以直接调用 getUserInfo 获取头像昵称
-          that.$parent.getAuthKey().then(resOpenid => {
-            that.queryUsreInfo(resOpenid);
-          });
+          if (that.$parent.globalData.openid) {
+            that.queryUsreInfo(that.$parent.globalData.openid);
+          } else {
+            that.$parent.getAuthKey().then(resOpenid => {
+              that.queryUsreInfo(resOpenid);
+            });
+          }
         } else {
           that.authLogin = true;
           that.$apply();
