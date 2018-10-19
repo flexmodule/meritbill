@@ -1,0 +1,140 @@
+<style lang="less">
+.tabbar {
+  display: flex;
+  background: #fff;
+  position: fixed;
+  width: 100%;
+  bottom: 0;
+  height: 120rpx;
+  box-sizing: border-box;
+  box-shadow: 10rpx 8rpx 16rpx 10rpx rgba(0, 0, 0, 0.1);
+  .tabbar-l,
+  .tabbar-c,
+  .tabbar-r {
+    padding: 23rpx 0 10rpx;
+    text-align: center;
+    flex: 1;
+    font-size: 0;
+    image {
+      width: 48rpx;
+      height: 48rpx;
+    }
+    .text {
+      font: 24rpx/44rpx '';
+      color: #999999;
+    }
+    .active {
+      color: #282828;
+    }
+  }
+}
+</style>
+<template>
+  <view class="tabbar">
+    <view class="tabbar-l" @tap="switchHome">
+      <image src="../img/home.png" wx:if="{{currentIndex==1}}"/>
+      <image src="../img/homeelse.png" wx:else/>
+      <view class="text {{currentIndex==1?'active':''}}">首页</view>
+    </view>
+    <view class="tabbar-c" @tap="switchMy">
+      <image src="../img/mine.png" wx:if="{{currentIndex==2}}"/>
+      <image src="../img/mineelse.png" wx:else/>
+      <view class="text {{currentIndex==2?'active':''}}">个人中心</view>
+    </view>
+    <view class="tabbar-r" @tap="switchIntro">
+      <image src="../img/qa.png" wx:if="{{currentIndex==3}}"/>
+      <image src="../img/qaelse.png" wx:else/>
+      <view class="text {{currentIndex==3?'active':''}}">使用说明</view>
+    </view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+import request from '@/utils/request.js';
+export default class tabbar extends wepy.component {
+  components = {};
+  props = {
+    currentIndex: {
+      type: Number,
+      default: 'null'
+    }
+  };
+  data = {
+    openid: '',
+    userid: '',
+    cardListData: []
+  };
+  methods = {
+    switchHome() {
+      this.currentIndex = 1;
+      wx.redirectTo({
+        url: `/pages/home/index` //跳转页面的路径，可带参数 ？隔开，不同参数用 & 分隔；相对路径，不需要.wxml后缀
+      });
+    },
+    switchMy() {
+      this.currentIndex = 2;
+      this.getCardList();
+    },
+    switchIntro() {
+      this.currentIndex = 3;
+      wx.redirectTo({
+        url: `/pages/intro/index` //跳转页面的路径，可带参数 ？隔开，不同参数用 & 分隔；相对路径，不需要.wxml后缀
+      });
+    },
+  };
+  getCardList() {
+      var that = this;
+      if (this.openid && this.userid) {
+        this.getcard(this.openid);
+      } else {
+        that.$parent.getAuthKey().then(res => {
+          wx.setStorageSync('userid', res.data.userid);
+          wx.setStorageSync('openid', res.data.openid);
+          that.openid = wx.getStorageSync('openid');
+          that.userid = wx.getStorageSync('userid');
+          that.getcard(that.openid);
+          that.$apply();
+        });
+      }
+    }
+  getcard(openid) {
+    var that=this;
+    request(
+      `/mianxi/api/getCardList?openid=${openid}`,
+      'get',
+      '',
+      '请求中',
+      function(res) {
+        console.log(JSON.stringify(res));
+        if (res.meta.success) {
+          let cardlist = res.list;
+          cardlist.forEach((order, i) => {
+            if (order.code != null && order.cardId != null) {
+              that.cardListData.push(order);
+            }
+          });
+          wx.openCard({
+            cardList: that.cardListData,
+            success: function(res) {}
+          });
+        } else {
+          wx.showToast({
+            title: res.meta.message,
+            icon: 'none',
+            duration: 500
+          });
+        }
+      },
+      function(err) {
+        console.log(err);
+      }
+    );
+  }
+  events = {};
+  onLoad() {
+    this.openid = wx.getStorageSync('openid');
+    this.userid = wx.getStorageSync('userid');
+    this.$apply();
+  }
+}
+</script>

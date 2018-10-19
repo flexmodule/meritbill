@@ -56,46 +56,6 @@ page {
     font: 30rpx/80rpx '';
     margin: 20rpx auto 0;
   }
-  .shadow {
-    background: rgba(0, 0, 0, 0.3);
-    width: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 99;
-    height: 100%;
-  }
-  .alertbox {
-    width: 500rpx;
-    height: 270rpx;
-    border-radius: 20rpx;
-    background: #fff;
-    border: 1rpx solid #eee;
-    padding: 20rpx;
-    position: fixed;
-    z-index: 100;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    margin: auto;
-    .apply {
-      font: 40rpx/80rpx '';
-    }
-    .applyList {
-      font: 30rpx/80rpx '';
-      color: #999;
-    }
-    .loginBtn {
-      width: 400rpx;
-      background: green;
-      border-radius: 50rpx;
-      color: #fff;
-      text-align: center;
-      margin: 20rpx auto;
-      font: 30rpx/60rpx '';
-    }
-  }
 }
 </style>
 <template>
@@ -114,16 +74,8 @@ page {
       <textarea maxlength="100" placeholder="最多输入50字(可不填)" value="{{message}}" @input="getMess"/>
       <view class="info">温馨提示：大胆放心的说,本平台全是匿名留言,对方不知道你是谁,只知道留言的内容</view>
     </view>
-    <view class="sub" @tap="sureHelp">提交,确认为他/她助力</view>
+    <view class="sub" @tap="sureHelp">确定提交</view>
     <view class="Btn" @tap="switchUrl">返回首页,我也要玩</view>
-    <view class="shadow" wx:if="{{authLogin}}">  
-      <view class="alertbox">
-        <view class="apply">申请获取以下权限</view>
-        <view class="applyList">获取您的公开信息(昵称，头像等)</view>
-        <button wx:if="{{canIUse}}" class="loginBtn" open-type="getUserInfo" bindgetuserinfo="getUserInfo">授权登录</button>
-        <view wx:else>请升级微信版本</view>
-      </view>
-    </view>
   </view>
 </template>
 <script>
@@ -134,8 +86,6 @@ export default class praise extends wepy.page {
     peopleNum: 0,
     handShow: true,
     bstop: true,
-    authLogin: false,
-    canIUse: wx.canIUse('button.open-type.getUserInfo'),
     inopenid: '',
     message: '',
     mannum: 0,
@@ -207,6 +157,7 @@ export default class praise extends wepy.page {
       );
     },
     tap() {
+      var that=this
       if (this.bstop) {
         this.handShow = false;
         this.peopleNum++;
@@ -220,8 +171,8 @@ export default class praise extends wepy.page {
       }
     },
     switchUrl() {
-      wx.switchTab({
-        url: '/pages/home/index'
+      wx.redirectTo({
+        url: '/pages/auth/index'
       });
     }
   };
@@ -229,32 +180,8 @@ export default class praise extends wepy.page {
     console.log(e);
     var that = this;
     if (e.detail.userInfo) {
-      that.$parent.getAuthKey().then(resOpenid => {
-        var sex;
-        if (e.detail.userInfo.gender == 1) {
-          sex = '男';
-        } else {
-          sex = '女';
-        }
-        var data = {
-          openid: resOpenid,
-          nickName: e.detail.userInfo.nickName,
-          avatarUrl: e.detail.userInfo.avatarUrl,
-          province: e.detail.userInfo.province,
-          city: e.detail.userInfo.city,
-          sex: sex
-        };
-        request(
-          '/userinfo',
-          'post',
-          data,
-          '请求中',
-          function(res) {
-            that.queryUsreInfo(resOpenid);
-          },
-          function(err) {}
-        );
-      });
+      that.authLogin = false;
+      
     } else {
       wx.showModal({
         title: '警告',
@@ -288,30 +215,9 @@ export default class praise extends wepy.page {
       function(err) {}
     );
   }
-  queryUsreInfo(openid) {
-    this.$parent.globalData.openid = openid;
-    var that = this;
-    request(
-      '/queryuserinfo',
-      'post',
-      { openid: openid },
-      '请求中',
-      function(res) {
-        console.log(res);
-        if (res.openid) {
-          that.authLogin = false;
-          that.getNum(res.openid);
-          that.$parent.globalData.userInfo = res;
-          that.$apply();
-        }
-      },
-      function(err) {}
-    );
-  }
   events = {};
   onLoad(options) {
     this.inopenid = decodeURIComponent(options.openid);
-    this.$apply();
     var that = this;
     wx.getSetting({
       success: function(res) {
@@ -319,14 +225,18 @@ export default class praise extends wepy.page {
         if (res.authSetting['scope.userInfo']) {
           // 已经授权，可以直接调用 getUserInfo 获取头像昵称
           that.$parent.getAuthKey().then(resOpenid => {
-            that.queryUsreInfo(resOpenid);
+            that.authLogin = false;
+            that.$parent.globalData.openid = resOpenid;
+            that.getNum(that.inopenid);
           });
+          that.$apply();
         } else {
           that.authLogin = true;
           that.$apply();
         }
       }
     });
+    this.$apply();
   }
 }
 </script>

@@ -22,6 +22,7 @@ setStore(store);
 export default class extends wepy.app {
   config = {
     pages: [
+      'pages/auth/index',
       'pages/home/index',
       'pages/my/index',
       'pages/complain/index',
@@ -67,7 +68,38 @@ export default class extends wepy.app {
   }
 
   onLaunch() {
-    
+    var that = this;
+    var codeText = {};
+    wx.login({
+        success: res => {
+          codeText.code = res.code;
+          request(
+            '/getopenid',
+            'post',
+            codeText,
+            '请求中',
+            function(res) {
+              if(res.meta.success) {
+                wx.setStorageSync('openid', res.data.openid);
+                that.globalData.openid = res.data.openid;
+              } else {
+                wx.showToast({
+                  title:"请求失败",
+                  icon: "none",
+                  duration: "1000"
+                })
+              } 
+            },
+            function(err) {
+              wx.showToast({
+                  title:"请求失败"+err,
+                  icon: "none",
+                  duration: "1000"
+                })
+            }
+          );
+        }
+      });
   }
   getAuthKey() {
     var that = this;
@@ -82,27 +114,27 @@ export default class extends wepy.app {
             codeText,
             '请求中',
             function(res) {
-              that.globalData.openid = res.openid;
-              resolve(res.openid);
+              if(res.meta.success) {
+                that.globalData.openid = res.data.openid;
+                resolve(res.data.openid);
+              } else {
+                wx.showToast({
+                  title:"请求失败",
+                  icon: "none",
+                  duration: 1000
+                })
+              } 
             },
             function(err) {
-              reject(err);
+              wx.showToast({
+                  title:"请求失败",
+                  icon: "none",
+                  duration: 1000
+                })
             }
           );
         }
       });
-    });
-  }
-  getUserInfo(cb) {
-    const that = this;
-    if (this.globalData.userInfo) {
-      return this.globalData.userInfo;
-    }
-    wepy.getUserInfo({
-      success(res) {
-        that.globalData.userInfo = res.userInfo;
-        cb && cb(res.userInfo);
-      }
     });
   }
 }

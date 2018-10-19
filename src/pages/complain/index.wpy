@@ -73,15 +73,15 @@ page {
     </view>
     <view class="title">请填写建议(选填)</view>
     <view class="inputData">
-      <textarea maxlength="100" placeholder="最多输入500字(可不填)" @input="getText" value="{{advice}}"/>
+      <textarea maxlength="100" placeholder="最多输入50字(可不填)" @input="getText" value="{{advice}}"/>
     </view>
     <view class="link">
-      <text class="linkTitle">请填写您的手机号</text>
-      <view class="mobile"><text>手机号</text><input placeholder="选填" @input="getValue('mobile')" value="{{mobileValue}}"/></view>
+      <text class="linkTitle">请填写您的手机号(3种联系方式至少写一个)</text>
+      <view class="mobile"><text>手机号</text><input placeholder="选填" @change="getValue('mobile')" value="{{mobileValue}}"/></view>
       <text class="linkTitle">或者填写您的微信号</text>
-      <view class="wechat"><text>微信号</text><input placeholder="选填" @input="getValue('wechat')" value="{{wechatValue}}"/></view>
+      <view class="wechat"><text>微信号</text><input placeholder="选填" @change="getValue('wechat')" value="{{wechatValue}}"/></view>
       <text class="linkTitle">或者填写您的QQ号，方便我们联系您</text>
-      <view class="qq"><text>QQ</text><input placeholder="选填" @input="getValue('qq')" value="{{qqValue}}"/></view>
+      <view class="qq"><text>QQ</text><input placeholder="选填" @change="getValue('qq')" value="{{qqValue}}"/></view>
     </view>
     <view class="sureSub" @tap="tapSub">确认提交</view>
   </view>
@@ -109,70 +109,116 @@ export default class complain extends wepy.page {
   methods = {
     tapSub() {
       var that = this;
-      var data = {};
-      data.outopenid = that.$parent.globalData.openid;
-      data.reasons = JSON.stringify(this.reasons);
-      data.advice = this.advice;
-      data.tel = this.mobileValue;
-      data.wechat = this.wechatValue;
-      data.qq = this.qqValue;
-      request(
-        '/advice/getadvice',
-        'post',
-        data,
-        '请求中',
-        function(res) {
-          console.log(res);
-          if (res.serverStatus&& res.serverStatus== 2) {
-            that.items.forEach(ele => {
-              ele.checked=false;
-            });
-            that.mobileValue = "";
-            that.wechatValue = "";
-            that.qqValue = "";
-            that.advice = "";
-            that.reasons = "";
-            wx.showToast({
-              title: '提交成功',
-              icon: 'none',
-              duration: 500
-            });
-            that.$apply();
-          } else {
-            that.items.forEach(ele => {
-              ele.checked=false;
-            });
-            that.mobileValue = "";
-            that.wechatValue = "";
-            that.qqValue = "";
-            that.advice = "";
-            that.reasons = "";
-            wx.showToast({
-              title: '提交失败',
-              icon: 'none',
-              duration: 500
-            });
-            that.$apply();
-          }
-        },
-        function(err) {}
-      );
+      this.openid = wx.getStorageSync('openid');
+      if (this.openid) {
+        if (this.mobileValue || this.wechatValue || this.qqValue) {
+          var data = {};
+          data.outopenid = this.openid;
+          data.reasons = JSON.stringify(this.reasons);
+          data.advice = this.advice;
+          data.tel = this.mobileValue;
+          data.wechat = this.wechatValue;
+          data.qq = this.qqValue;
+          request(
+            '/advice/getadvice',
+            'post',
+            data,
+            '请求中',
+            function(res) {
+              if (res.meta.success) {
+                that.items.forEach(ele => {
+                  ele.checked = false;
+                });
+                that.mobileValue = '';
+                that.wechatValue = '';
+                that.qqValue = '';
+                that.advice = '';
+                that.reasons = '';
+                wx.showToast({
+                  title: '提交成功',
+                  icon: 'none',
+                  duration: 500
+                });
+                that.$apply();
+              } else {
+                that.items.forEach(ele => {
+                  ele.checked = false;
+                });
+                that.mobileValue = '';
+                that.wechatValue = '';
+                that.qqValue = '';
+                that.advice = '';
+                that.reasons = '';
+                wx.showToast({
+                  title: '提交失败',
+                  icon: 'none',
+                  duration: 500
+                });
+                that.$apply();
+              }
+            },
+            function(err) {}
+          );
+        } else {
+          wx.showToast({
+            title: '请至少填写一个联系方式，方便客服联系您',
+            icon: 'none',
+            duration: 1000
+          });
+        }
+      }
     },
     checkboxChange(e) {
       this.reasons = e.detail.value;
       console.log(e.detail.value);
     },
     getText(e) {
-      this.advice = e.detail.value;
-      console.log(this.advice);
+      console.log(e.detail.value);
+      var textreg = /<script.*?>.*?<\/script>/gi;
+      if (!textreg.test(e.detail.value)) {
+        this.advice = e.detail.value;
+      } else {
+        wx.showToast({
+          title: '含有非法字符，请正确填写!',
+          icon: 'none',
+          duration: 1000
+        });
+      }
     },
     getValue(data, e) {
       if (data == 'mobile') {
-        this.mobileValue = e.detail.value;
+        var myreg = /^[1][3,4,5,7,8][0-9]{9}$/;
+        if (myreg.test(e.detail.value)) {
+          this.mobileValue = e.detail.value;
+        } else {
+          wx.showToast({
+            title: '手机号格式错误,请正确填写!',
+            icon: 'none',
+            duration: 1000
+          });
+        }
       } else if (data == 'wechat') {
-        this.wechatValue = e.detail.value;
+        var wechatreg = /<script.*?>.*?<\/script>/gi;
+        if (!wechatreg.test(e.detail.value)) {
+          this.wechatValue = e.detail.value;
+        } else {
+          wx.showToast({
+            title: '含有非法字符，请正确填写!',
+            icon: 'none',
+            duration: 1000
+          });
+        }
       } else if (data == 'qq') {
-        this.qqValue = e.detail.value;
+        var qqreg = /^[0-9]{1,12}$/;
+        if (qqreg.test(e.detail.value)) {
+          this.qqValue = e.detail.value;
+        } else {
+          wx.showToast({
+            title: 'qq格式错误,请正确填写!',
+            icon: 'none',
+            duration: 1000
+          });
+        }
       }
     }
   };

@@ -1,0 +1,169 @@
+<style lang="less">
+.auth {
+  overflow: hidden;
+  border: 10rpx solid #ffdb2f;
+  box-sizing: border-box;
+  .maintitle {
+    margin: 100rpx auto 0;
+    width: 750rpx;
+    height: 144rpx;
+    image {
+      width: 100%;
+      height: 100%;
+    }
+  }
+  .back {
+    width: 401rpx;
+    height: 422rpx;
+    margin: 100rpx auto;
+    image {
+      width: 100%;
+      height: 100%;
+    }
+  }
+  .bth {
+    width: 480rpx;
+    height: 80rpx;
+    background: #ffdb2f;
+    border: 4rpx solid #000;
+    font: 40rpx/80rpx '';
+    border-radius: 40rpx;
+    text-align: center;
+    margin: 0 auto;
+  }
+}
+</style>
+<template>
+  <view class="auth" style="height:{{oHeight}}">
+    <view class="maintitle"><image src="../../img/title.png"/></view>
+    <view class="back"><image src="../../img/info.png"/></view>
+    <button wx:if="{{canIUse}}" class="bth" open-type="getUserInfo" bindgetuserinfo="getUserInfo">我也要玩,点此进入</button>
+    <view class="bth" wx:else>请升级微信版本</view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+import request from '@/utils/request.js';
+export default class home extends wepy.page {
+  data = {
+    oHeight: '',
+    canIUse: wx.canIUse('button.open-type.getUserInfo'),
+    openid: ''
+  };
+  components = {};
+  methods = {};
+  events = {};
+  getUserInfo(e) {
+    console.log(e);
+    var that = this;
+    if (e.detail.userInfo) {
+      var sex;
+      if (e.detail.userInfo.gender == 1) {
+        sex = '男';
+      } else {
+        sex = '女';
+      }
+      wx.setStorageSync('nickName', e.detail.userInfo.nickName);
+      wx.setStorageSync('avatarUrl', e.detail.userInfo.avatarUrl);
+      if (wx.getStorageSync('openid')) {
+        this.openid = wx.getStorageSync('openid');
+        var data = {
+          openid: this.openid,
+          nickName: e.detail.userInfo.nickName,
+          avatarUrl: e.detail.userInfo.avatarUrl,
+          province: e.detail.userInfo.province,
+          city: e.detail.userInfo.city,
+          sex: sex
+        };
+        request(
+          '/userinfo',
+          'post',
+          data,
+          '请求中',
+          function(res) {
+            if (res.meta.success) {
+              wx.navigateTo({
+                url:'/pages/home/index',  //跳转页面的路径，可带参数 ？隔开，不同参数用 & 分隔；相对路径，不需要.wxml后缀
+                success:function(){}        //成功后的回调；
+                fail：function(){}          //失败后的回调；
+                complete：function(){}      //结束后的回调(成功，失败都会执行)
+              })
+            } else {
+              wx.showToast({
+                title: '请求失败',
+                icon: 'none',
+                duration: 1000
+              });
+            }
+          },
+          function(err) {
+            wx.showToast({
+              title: '请求失败',
+              icon: 'none',
+              duration: 1000
+            });
+          }
+        );
+      } else {
+        that.$parent.getAuthKey().then(resOpenid => {
+          var data = {
+            openid: resOpenid,
+            nickName: e.detail.userInfo.nickName,
+            avatarUrl: e.detail.userInfo.avatarUrl,
+            province: e.detail.userInfo.province,
+            city: e.detail.userInfo.city,
+            sex: sex
+          };
+          request(
+            '/userinfo',
+            'post',
+            data,
+            '请求中',
+            function(res) {
+              if (res.meta.success) {
+                wx.navigateTo({
+                  url:'/pages/home/index',  //跳转页面的路径，可带参数 ？隔开，不同参数用 & 分隔；相对路径，不需要.wxml后缀
+                  success:function(){}        //成功后的回调；
+                  fail：function(){}          //失败后的回调；
+                  complete：function(){}      //结束后的回调(成功，失败都会执行)
+                })
+              } else {
+                wx.showToast({
+                  title: '请求失败',
+                  icon: 'none',
+                  duration: 1000
+                });
+              }
+            },
+            function(err) {
+              wx.showToast({
+                title: '请求失败',
+                icon: 'none',
+                duration: 1000
+              });
+            }
+          );
+        });
+      }
+    } else {
+      wx.showModal({
+        title: '警告',
+        content: '您点击了拒绝授权，将无法进入小程序，请授权之后再进入!!!',
+        showCancel: false,
+        confirmText: '返回授权',
+        success: function(res) {
+          if (res.confirm) {
+            console.log('用户点击了“返回授权”');
+          }
+        }
+      });
+    }
+  }
+  onLoad() {
+    var res = wx.getSystemInfoSync();
+    this.openid = wx.getStorageSync('openid');
+    this.oHeight = res.windowHeight + 'px';
+    this.$apply();
+  }
+}
+</script>

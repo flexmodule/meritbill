@@ -57,46 +57,6 @@ page {
       }
     }
   }
-  .shadow {
-    background: rgba(0, 0, 0, 0.3);
-    width: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 99;
-    height: 100%;
-  }
-  .alertbox {
-    width: 500rpx;
-    height: 270rpx;
-    border-radius: 20rpx;
-    background: #fff;
-    border: 1rpx solid #eee;
-    padding: 20rpx;
-    position: fixed;
-    z-index: 100;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    margin: auto;
-    .apply {
-      font: 40rpx/80rpx '';
-    }
-    .applyList {
-      font: 30rpx/80rpx '';
-      color: #999;
-    }
-    .loginBtn {
-      width: 400rpx;
-      background: green;
-      border-radius: 50rpx;
-      color: #fff;
-      text-align: center;
-      margin: 20rpx auto;
-      font: 30rpx/60rpx '';
-    }
-  }
 }
 </style>
 <template>
@@ -111,14 +71,6 @@ page {
       <navigator class="data" url="/pages/praise/index" hover-class="none"><image src="../../img/tel.png" class="img"/><text>联系我们(商务合作)</text><image class="arrow" src="../../img/right.png"/></navigator>
     </view>
     <view class="complain" ><navigator url="/pages/complain/index" hover-class="navigator-hover">投诉与建议</navigator></view>
-    <view class="shadow" wx:if="{{authLogin}}">  
-      <view class="alertbox">
-        <view class="apply">申请获取以下权限</view>
-        <view class="applyList">获取您的公开信息(昵称，头像等)</view>
-        <button wx:if="{{canIUse}}" class="loginBtn" open-type="getUserInfo" bindgetuserinfo="getUserInfo">授权登录</button>
-        <view wx:else>请升级微信版本</view>
-      </view>
-    </view>
   </view>
 </template>
 <script>
@@ -126,93 +78,13 @@ import wepy from 'wepy';
 import request from '@/utils/request.js';
 export default class my extends wepy.page {
   data = {
-    authLogin: false,
-    canIUse: wx.canIUse('button.open-type.getUserInfo')
   };
   components = {};
   methods = {};
   events = {};
-  getUserInfo(e) {
-    console.log(e);
-    var that = this;
-    if (e.detail.userInfo) {
-      that.$parent.getAuthKey().then(resOpenid => {
-        var sex;
-        if (e.detail.userInfo.gender == 1) {
-          sex = '男';
-        } else {
-          sex = '女';
-        }
-        var data = {
-          openid: resOpenid,
-          nickName: e.detail.userInfo.nickName,
-          avatarUrl: e.detail.userInfo.avatarUrl,
-          province: e.detail.userInfo.province,
-          city: e.detail.userInfo.city,
-          sex: sex
-        };
-        request(
-          '/userinfo',
-          'post',
-          data,
-          '请求中',
-          function(res) {
-            that.queryUsreInfo(resOpenid);
-          },
-          function(err) {}
-        );
-      });
-    } else {
-      wx.showModal({
-        title: '警告',
-        content: '您点击了拒绝授权，将无法进入小程序，请授权之后再进入!!!',
-        showCancel: false,
-        confirmText: '返回授权',
-        success: function(res) {
-          if (res.confirm) {
-            console.log('用户点击了“返回授权”');
-          }
-        }
-      });
-    }
-  }
-  queryUsreInfo(openid) {
-    this.$parent.globalData.openid = openid;
-    var that = this;
-    request(
-      '/queryuserinfo',
-      'post',
-      { openid: openid },
-      '请求中',
-      function(res) {
-        console.log(res);
-        that.authLogin = false;
-        that.$parent.globalData.userInfo = res;
-        that.$apply();
-      },
-      function(err) {}
-    );
-  }
   onLoad() {
     var that = this;
-    wx.getSetting({
-      success: function(res) {
-        console.log(res);
-        if (res.authSetting['scope.userInfo']) {
-          // 已经授权，可以直接调用 getUserInfo 获取头像昵称
-          if (that.$parent.globalData.openid) {
-            that.queryUsreInfo(that.$parent.globalData.openid);
-          } else {
-            that.$parent.getAuthKey().then(resOpenid => {
-              that.queryUsreInfo(resOpenid);
-            });
-          }
-        } else {
-          that.authLogin = true;
-          that.$apply();
-        }
-      }
-    });
+ 
   }
 }
 </script>

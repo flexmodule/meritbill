@@ -22,7 +22,6 @@ page {
       font: 38rpx/60rpx '';
       margin-top: 20rpx;
     }
-    .sex,
     .advan {
       label {
         margin: 0 18rpx 18rpx 0;
@@ -113,14 +112,6 @@ page {
   <view class="poster">
     <view class="headimg"><view class="userinfo-avatar"><open-data type="userAvatarUrl"></open-data></view></view>
     <view class="main">
-      <view class="title">请选择您的性别：</view>
-      <view class="sex">
-        <radio-group class="radio-group" bindchange="sexChange">
-          <label class="radio" wx:for="{{sexs}}" wx:key="{{item.name}}">
-            <radio value="{{item.name}}"/>{{item.value}}
-          </label>
-        </radio-group>
-      </view>
       <view class="title">请选择您脱单的实力：</view>
       <view class="advan">
         <checkbox-group bindchange="advanChange">
@@ -131,7 +122,7 @@ page {
       </view>
     </view>
     <view class="footer">
-      <button wx:if="{{canIUse}}" class="footer-b" open-type="getUserInfo" bindgetuserinfo="makePoster">生成海报,show实力,win脱单</button>
+      <view class="footer-b"  @tap="makePoster">生成海报,show实力,win脱单</view>
     </view>
     <view class="canvas-box" wx:if="{{isShowCav}}" >
       <canvas canvas-id="shareCanvas" style="width:{{oWidth}}px;height:{{oHeight}}px"></canvas>
@@ -153,7 +144,6 @@ export default class poster extends wepy.page {
   data = {
     canIUse: wx.canIUse('button.open-type.openSetting'),
     getAuth: false,
-    sexs: [{ name: '男', value: '男' }, { name: '女', value: '女' }],
     advans: [
       { name: '会画画', value: '会画画' },
       { name: '会弹吉他', value: '会弹吉他' },
@@ -176,18 +166,67 @@ export default class poster extends wepy.page {
     authLogin: false,
     advansList: '',
     rpa: '',
-    sex: ''
+    url: ""
   };
   components = {};
   methods = {
-    sexChange(e) {
-      this.sex = e.detail.value;
-      console.log(e.detail.value);
-    },
     advanChange(e) {
-      this.advansList = e.detail.value;
-      console.log(e.detail.value);
+      if (this.advansList.length < 10) {
+        this.advansList = e.detail.value;
+        console.log(e.detail.value);
+      } else {
+        this.advansList = e.detail.value;
+        wx.showModal({
+          title: '警告',
+          content:
+            '为了海报排版好看,您最多只能选择10个,如果您优点够多,可以选择多生成几张海报！',
+          showCancel: false,
+          confirmText: '返回',
+          success: function(res) {
+            if (res.confirm) {
+              console.log('用户点击了“返回”');
+            }
+          }
+        });
+      }
+    },
+    makePoster() {
+    var that = this;
+    this.name = wx.getStorageSync("nickName");
+    this.url=wx.getStorageSync("avatarUrl");
+    this.openid=wx.getStorageSync("openid");
+    if (this.advansList != '' && this.advansList.length != 0) {
+      if (this.advansList.length <= 10) {
+        wx.showLoading({
+          title: '正在生成...'
+        });
+        var that = this;
+        that.isShowCav = true;
+        if(this.url&&this.openid&&this.name) {
+          that.getImageInfo(this.url);
+        }
+      } else {
+        wx.showModal({
+          title: '警告',
+          content:
+            '为了海报排版好看,您最多只能选择10个,如果您优点够多,可以选择多生成几张海报！',
+          showCancel: false,
+          confirmText: '返回',
+          success: function(res) {
+            if (res.confirm) {
+              console.log('用户点击了“返回”');
+            }
+          }
+        });
+      }
+    } else {
+      wx.showToast({
+        title: '请选择出售的优点',
+        icon: 'none',
+        duration: 1000
+      });
     }
+  }
   };
   events = {};
   getOpenSet(e) {
@@ -211,121 +250,9 @@ export default class poster extends wepy.page {
           }
         }
       });
-    }
+    } 
   }
-  makePoster(e) {
-    var that=this
-    var options = {
-      path: `pages/praise/index?openid=${that.$parent.globalData.openid}`,
-    };
-    request(
-      '/qrcode',
-      'get',
-      options,
-      '请求中',
-      function(res) {
-        console.log(res);
-      },
-      function(err) {}
-    );
-    this.name = e.detail.userInfo.nickName;
-    console.log(e);
-    if (this.advansList !== '') {
-      wx.showLoading({
-        title: '正在生成...'
-      });
-      var that = this;
-      that.isShowCav = true;
-      that.getImageInfo(e.detail.userInfo.avatarUrl);
-    } else {
-      wx.showToast({
-        title: '请选择出售的优点',
-        icon: 'none',
-        duration: 1000
-      });
-    }
-  }
-  getUserInfo(e) {
-    var that = this;
-    that.authLogin = false;
-    console.log(e.detail.userInfo);
-  }
-  handlePoster() {
-    var that = this;
-    var resPath = '../../img/poster.png';
-    //绘制canvas背景图
-    var rpx = that.rpa;
-    const ctx = wx.createCanvasContext('shareCanvas');
-    ctx.drawImage(resPath, 0, 0, that.oWidth, that.oHeight);
-
-    //绘制用户头像
-    ctx.save();
-    let r = 60;
-    let cx = 10;
-    let cy = 290;
-    ctx.arc((cx + r) * rpx, (cy + r) * rpx, r * rpx, 0, 2 * Math.PI);
-    ctx.clip();
-    ctx.drawImage(that.headImg, 10 * rpx, 290 * rpx, 120 * rpx, 120 * rpx);
-    ctx.restore();
-    //绘制文字
-    ctx.setTextAlign('left');
-    ctx.font = 'italic small-caps bold 12px arial';
-    ctx.setFontSize(20 * rpx);
-    ctx.fillStyle = '#2a358b';
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
-    // 将阴影向右移动15px，向上移动10px
-    ctx.shadowOffsetX = 8 * rpx;
-    ctx.shadowOffsetY = 8 * rpx;
-    // 轻微模糊阴影
-    ctx.shadowBlur = 8 * rpx;
-    ctx.fillText(`哈哈,我是${that.name}`, 50 * rpx, 60 * rpx);
-    ctx.font = 'normal small-caps bold 12px arial';
-    ctx.setFontSize(26 * rpx);
-    ctx.fillText(`喊你秀秀优点，一起脱单吧！`, 28 * rpx, 100 * rpx);
-    let contentArray = that.advansList;
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 0;
-    ctx.font = 'normal small-caps bold 12px arial';
-    ctx.shadowBlur = 0;
-    ctx.setTextAlign('left');
-    ctx.setFontSize(12 * rpx);
-    let contentHh = 10 * 1.3;
-    for (let m = 0; m < contentArray.length; m++) {
-      ctx.setFillStyle('#1cd7fe');
-      ctx.fillText(contentArray[m], 26 * rpx, (450 + contentHh * m) * rpx);
-      ctx.fillRect(17 * rpx, (443 + contentHh * m) * rpx, 6 * rpx, 6 * rpx);
-    }
-    //绘制优点
-    ctx.setTextAlign('left');
-    ctx.setFontSize(15 * rpx);
-    ctx.fillText(`show你脱单的实力:`, 16 * rpx, 430 * rpx);
-    ctx.draw();
-    setTimeout(function() {
-      console.log(5555);
-      wx.canvasToTempFilePath({
-        canvasId: 'shareCanvas',
-        fileType: 'jpg',
-        success: function(res) {
-          console.log(res);
-          console.log(56666);
-          wx.saveImageToPhotosAlbum({
-            filePath: res.tempFilePath,
-            success(res) {
-              console.log(res);
-              wx.hideLoading();
-              wx.showToast({
-                title: '保存成功'
-              });
-            },
-            fail(err) {
-              console.log(err);
-              wx.hideLoading();
-            }
-          });
-        }
-      });
-    }, 500);
-  }
+  
   getImageInfo(url) {
     var that = this; //  图片缓存本地的方法
     if (typeof url === 'string') {
@@ -342,8 +269,132 @@ export default class poster extends wepy.page {
       });
     }
   }
+  handlePoster() {
+    var that = this;
+    var options = {
+      width: 260,
+      path: `pages/praise/index?openid=${that.openid}`
+    };
+    request(
+      '/qrcode',
+      'get',
+      options,
+      '请求中',
+      function(res) {
+        if (res.meta.success) {
+          var resPath = '../../img/poster.png';
+          //绘制canvas背景图
+          var rpx = that.rpa;
+          const ctx = wx.createCanvasContext('shareCanvas');
+          ctx.drawImage(resPath, 0, 0, that.oWidth, that.oHeight);
+          //绘制用户头像
+          ctx.save();
+          let r = 60;
+          let cx = 20;
+          let cy = 310;
+          ctx.arc((cx + r) * rpx, (cy + r) * rpx, r * rpx, 0, 2 * Math.PI);
+          ctx.clip();
+          ctx.drawImage(
+            that.headImg,
+            20 * rpx,
+            310 * rpx,
+            120 * rpx,
+            120 * rpx
+          );
+          ctx.restore();
+          //绘制文字
+          ctx.setTextAlign('left');
+          ctx.setFontSize(20 * rpx);
+          ctx.fillStyle = '#2a358b';
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
+          // 将阴影向右移动15px，向上移动10px
+          ctx.shadowOffsetX = 8 * rpx;
+          ctx.shadowOffsetY = 8 * rpx;
+          // 轻微模糊阴影
+          ctx.shadowBlur = 8 * rpx;
+          ctx.fillText(`哈哈,我是${that.name}`, 50 * rpx, 50 * rpx);
+          ctx.fillText(`我有以下优点！！！`, 90 * rpx, 75 * rpx);
+          ctx.fillText(`在我脱单的路上,你们`, 70 * rpx, 100 * rpx);
+          ctx.fillText(`有什么建议或心里话要对我说...`, 35 * rpx, 125 * rpx);
+          let contentArray = that.advansList;
+          ctx.shadowOffsetX = 0;
+          ctx.shadowOffsetY = 0;
+          ctx.font = 'normal small-caps bold 12px arial';
+          ctx.shadowBlur = 0;
+          ctx.setTextAlign('left');
+          ctx.setFontSize(12 * rpx);
+          let contentHh = 10 * 1.3;
+          for (let m = 0; m < contentArray.length; m++) {
+            ctx.setFillStyle('#333333');
+            ctx.fillText(
+              contentArray[m],
+              40 * rpx,
+              (470 + contentHh * m) * rpx
+            );
+            ctx.fillRect(
+              31 * rpx,
+              (463 + contentHh * m) * rpx,
+              6 * rpx,
+              6 * rpx
+            );
+          }
+          //绘制优点
+          ctx.setTextAlign('left');
+          ctx.setFontSize(15 * rpx);
+          ctx.fillText(`show你脱单的实力:`, 16 * rpx, 450 * rpx);
+          //绘制二维码
+          ctx.save();
+          ctx.drawImage(res.data.imgurl, 210 * rpx, 340 * rpx, 140 * rpx, 140 * rpx);
+          ctx.restore();
+          ctx.setTextAlign('left');
+          ctx.setFontSize(15 * rpx);
+          ctx.fillText(`欢迎扫码`, 250 * rpx, 510 * rpx);
+          ctx.fillText(`对你的好友提提建议`, 210 * rpx, 530 * rpx);
+          ctx.fillText(`对你的好友说悄悄话`, 210 * rpx, 550 * rpx);
+          ctx.fillText(`为你的好友脱单点赞`, 210 * rpx, 570 * rpx);
+          ctx.draw();
+          setTimeout(function() {
+            wx.canvasToTempFilePath({
+              canvasId: 'shareCanvas',
+              fileType: 'jpg',
+              success: function(res) {
+                console.log(res);
+                wx.saveImageToPhotosAlbum({
+                  filePath: res.tempFilePath,
+                  success(res) {
+                    console.log(res);
+                    wx.hideLoading();
+                    wx.showToast({
+                      title: '保存成功'
+                    });
+                  },
+                  fail(err) {
+                    console.log(err);
+                    wx.hideLoading();
+                  }
+                });
+              }
+            });
+          }, 500);
+        } else {
+          wx.showToast({
+            title: '系统错误'
+          });
+        }
+      },
+      function(err) {
+        wx.showToast({
+          title: '系统错误'+err
+        });
+      }
+    );
+  }
+  
   onLoad() {
     var that = this;
+    this.name = wx.getStorageSync("nickName");
+    this.url=wx.getStorageSync("avatarUrl");
+    this.openid=wx.getStorageSync("openid");
     wx.getSetting({
       success(res) {
         if (!res.authSetting['scope.writePhotosAlbum']) {
@@ -375,10 +426,10 @@ export default class poster extends wepy.page {
       this.oHeight = res.windowHeight;
       this.oWidth = res.windowWidth;
       this.rpa = res.windowWidth / 375;
-      this.$apply();
     } catch (e) {
       // Do something when catch error
     }
+    this.$apply();
   }
 }
 </script>

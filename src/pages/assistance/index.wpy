@@ -98,6 +98,13 @@ page {
       }
     }
   }
+  .canvas-box {
+    position: fixed;
+    z-index: 99;
+    top: 0;
+    width: 100%;
+    left: 0;
+  }
 }
 </style>
 <template>
@@ -129,11 +136,14 @@ page {
       </view>
     </view>
     <view class="footer">
-      <view class="quickmake">立即合成脱单战绩海报</view>
+      <view class="quickmake" @tap="compose">立即合成脱单战绩海报</view>
     </view>
     <view class="alert" wx:if="{{boxShow}}">
       <view class="closeimg" @tap="closeInfo"><image src="../../img/close.png"/></view>
       <view class="messDetail">{{messDetail}}</view>
+    </view>
+    <view class="canvas-box" wx:if="{{isShowCav}}" >
+      <canvas canvas-id="combatCanvas" style="width:{{oWidth}}px;height:{{PHeight}}px"></canvas>
     </view>
   </view>
 </template>
@@ -142,12 +152,12 @@ import wepy from 'wepy';
 import request from '@/utils/request.js';
 export default class assistance extends wepy.page {
   data = {
-    totalNum: 0,
+    totalNum: "",
     percentNum: 100,
-    percentManNum: 0,
-    percentWomanNum: 0,
-    manNum: 0,
-    womanNum: 0,
+    percentManNum: "",
+    percentWomanNum: "",
+    manNum: "",
+    womanNum: "",
     messListData: [],
     oHeight: '',
     loadmore: false,
@@ -158,10 +168,73 @@ export default class assistance extends wepy.page {
       end: false
     },
     boxShow: false,
-    messDetail: ''
+    messDetail: '',
+    rpa: '',
+    PHeight: "",
+    oWidth: "",
+    isShowCav: false
   };
   components = {};
   methods = {
+    compose() {
+      var that=this
+      that.isShowCav = true;
+      console.log(8888)
+          var resPath = '../../img/zhanji.png';
+          //绘制canvas背景图
+          var rpx = that.rpa;
+          const ctx = wx.createCanvasContext('combatCanvas');
+          ctx.drawImage(resPath, 0, 0, that.oWidth, that.PHeight);
+          //绘制文字
+          ctx.setTextAlign('left');
+          ctx.setFontSize(15 * rpx);
+          ctx.fillStyle = '#2a358b';
+          ctx.fillText(`总助力：${that.totalNum}人`, 30 * rpx, 80 * rpx);
+          ctx.fillText(`男：${that.manNum}人`, 30 * rpx, 120 * rpx);
+          ctx.fillText(`女：${that.womanNum}人`, 30 * rpx, 160 * rpx);
+          //绘制进度条
+          ctx.fillStyle = "#fff";  //对画布填充颜色  
+          ctx.fillRect(50* rpx, 90* rpx, 100* rpx, 12* rpx); //fillRect() 方法绘制“已填色”的矩形。默认的填充颜色是黑色。
+          ctx.fillStyle = "#7565e9";  //为将要画的图像设置颜色
+          ctx.fillRect(50* rpx, 9 * rpx,100* rpx,12* rpx);  //图像的坐标以及宽高
+          ctx.strokeRect(50* rpx, 95* rpx,100* rpx,12* rpx); 
+          // //绘制二维码
+          // ctx.save();
+          // ctx.drawImage(res.data, 210 * rpx, 340 * rpx, 140 * rpx, 140 * rpx);
+          // ctx.restore();
+          // ctx.setTextAlign('left');
+          // ctx.setFontSize(15 * rpx);
+          // ctx.fillText(`欢迎扫码`, 250 * rpx, 510 * rpx);
+          // ctx.fillText(`对你的好友说悄悄话`, 210 * rpx, 530 * rpx);
+          // ctx.fillText(`为你的好友脱单点赞`, 210 * rpx, 550 * rpx);
+          ctx.draw();
+          setTimeout(function() {
+            wx.canvasToTempFilePath({
+              canvasId: 'combatCanvas',
+              fileType: 'jpg',
+              success: function(res) {
+                console.log(res);
+                wx.saveImageToPhotosAlbum({
+                  filePath: res.tempFilePath,
+                  success(res) {
+                    console.log(res);
+                    wx.hideLoading();
+                    wx.showToast({
+                      title: '保存成功'
+                    });
+                  },
+                  fail(err) {
+                    console.log(err);
+                    wx.hideLoading();
+                  }
+                });
+              },
+              fail: function(err) {
+                console.log(err)
+              }
+            });
+          }, 500);
+    },
     toDetail(mess) {
       this.messDetail = mess;
       this.boxShow = true;
@@ -264,7 +337,10 @@ export default class assistance extends wepy.page {
     });
     try {
       var res = wx.getSystemInfoSync();
+      this.PHeight=res.windowHeight;
       this.oHeight = res.windowHeight - 330;
+      this.oWidth = res.windowWidth;
+      this.rpa = res.windowWidth / 375;
       this.$apply();
     } catch (e) {
       // Do something when catch error
