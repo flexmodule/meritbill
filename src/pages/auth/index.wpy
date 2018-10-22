@@ -37,7 +37,7 @@
   <view class="auth" style="height:{{oHeight}}">
     <view class="maintitle"><image src="../../img/title.png"/></view>
     <view class="back"><image src="../../img/info.png"/></view>
-    <button wx:if="{{canIUse}}" class="bth" open-type="getUserInfo" bindgetuserinfo="getUserInfo">我也要玩,点此进入</button>
+    <button wx:if="{{canIUse}}" class="bth" open-type="getUserInfo" bindgetuserinfo="getUserInfo">我要去玩,点此进入</button>
     <view class="bth" wx:else>请升级微信版本</view>
   </view>
 </template>
@@ -82,11 +82,11 @@ export default class home extends wepy.page {
           '请求中',
           function(res) {
             if (res.meta.success) {
-              wx.navigateTo({
+              wx.switchTab({
                 url:'/pages/home/index',  //跳转页面的路径，可带参数 ？隔开，不同参数用 & 分隔；相对路径，不需要.wxml后缀
-                success:function(){}        //成功后的回调；
-                fail：function(){}          //失败后的回调；
-                complete：function(){}      //结束后的回调(成功，失败都会执行)
+                success:function(){}   ,     //成功后的回调；
+                fail: function(){}     ,     //失败后的回调；
+                complete: function(){}      //结束后的回调(成功，失败都会执行)
               })
             } else {
               wx.showToast({
@@ -121,11 +121,11 @@ export default class home extends wepy.page {
             '请求中',
             function(res) {
               if (res.meta.success) {
-                wx.navigateTo({
+                wx.switchTab({
                   url:'/pages/home/index',  //跳转页面的路径，可带参数 ？隔开，不同参数用 & 分隔；相对路径，不需要.wxml后缀
-                  success:function(){}        //成功后的回调；
-                  fail：function(){}          //失败后的回调；
-                  complete：function(){}      //结束后的回调(成功，失败都会执行)
+                  success:function(){}   ,     //成功后的回调；
+                  fail: function(){} ,         //失败后的回调；
+                  complete: function(){}      //结束后的回调(成功，失败都会执行)
                 })
               } else {
                 wx.showToast({

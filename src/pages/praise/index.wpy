@@ -71,11 +71,11 @@ page {
       <view class="messToTitle">
         <view class="messToTitle-t">在她/他脱单的路上,你想对他/她说:</view>
       </view>
-      <textarea maxlength="100" placeholder="最多输入50字(可不填)" value="{{message}}" @input="getMess"/>
+      <textarea maxlength="100" placeholder="最多输入50字(不能为空)" value="{{message}}" @input="getMess"/>
       <view class="info">温馨提示：大胆放心的说,本平台全是匿名留言,对方不知道你是谁,只知道留言的内容</view>
     </view>
     <view class="sub" @tap="sureHelp">确定提交</view>
-    <view class="Btn" @tap="switchUrl">返回首页,我也要玩</view>
+    <view class="Btn" @tap="switchUrl">返回,我也要玩</view>
   </view>
 </template>
 <script>
@@ -83,91 +83,138 @@ import wepy from 'wepy';
 import request from '@/utils/request.js';
 export default class praise extends wepy.page {
   data = {
-    peopleNum: 0,
+    peopleNum: '',
     handShow: true,
     bstop: true,
     inopenid: '',
     message: '',
-    mannum: 0,
-    womannum: 0
+    outopenid: ''
   };
   components = {};
   methods = {
     getMess(e) {
-      this.message = e.detail.value;
-    },
-    updateNum(options) {
-      request( 
-        '/updatenum',
-        'post',
-        options,
-        '请求中',
-        function(res) {
-          if (res.serverStatus && res.serverStatus == 2) {
-            wx.showToast({
-              title: '助力成功',
-              icon: 'none',
-              duration: 500
-            });
-            that.$apply();
-          } else {
-            wx.showToast({
-              title: '助力失败',
-              icon: 'none',
-              duration: 500
-            });
-            that.$apply();
-          }
-        },
-        function(err) {}
-      );
-    },
-    sureHelp() {
-      var that = this;
-      var data = {
-        inopenid: that.inopenid,
-        totalnum: that.peopleNum,
-        message: that.message,
-        outopenid: that.$parent.globalData.userInfo.openid
-      };
-      var options={
-        openid: that.inopenid,
-        totalnum: that.peopleNum,
-        man: that.mannum,
-        woman: that.womannum,
+      var textreg = /<script.*?>.*?<\/script>/gi;
+      if (!textreg.test(e.detail.value)) {
+        this.message = e.detail.value;
+      } else {
+        wx.showToast({
+          title: '含有非法字符，请正确填写!',
+          icon: 'none',
+          duration: 1000
+        });
       }
-      request( 
-        '/gethelp',
-        'post',
-        data,
-        '请求中',
-        function(res) {
-          if (res.serverStatus && res.serverStatus == 2) {
+    },
+    tap() {
+      var that = this;
+      if (this.peopleNum !== '') {
+        if (this.bstop) {
+          this.handShow = false;
+          this.peopleNum++;
+          this.bstop = false;
+          if (that.inopenid) {
+            var options = {
+              openid: that.inopenid,
+              totalnum: Number(that.peopleNum)
+            };
             that.updateNum(options);
           } else {
             wx.showToast({
-              title: '助力失败',
+              title: '获取openid失败',
               icon: 'none',
-              duration: 500
+              duration: 1000
             });
-            that.$apply();
           }
-        },
-        function(err) {}
-      );
+        }
+      }
     },
-    tap() {
-      var that=this
-      if (this.bstop) {
-        this.handShow = false;
-        this.peopleNum++;
-        this.bstop = false;
-        if (that.$parent.globalData.userInfo.sex == '男') {
-          this.mannum++;
+    sureHelp() {
+      var that = this;
+      if (that.message !== '' && that.inopenid !== '') {
+        if (wx.getStorageSync('openid')) {
+          that.outopenid = wx.getStorageSync('openid');
+          var data = {
+            inopenid: that.inopenid,
+            totalnum: that.peopleNum,
+            message: that.message,
+            outopenid: that.outopenid
+          };
+          request(
+            '/userhelp/gethelp',
+            'post',
+            data,
+            '请求中',
+            function(res) {
+              if (res.meta.success) {
+                wx.showToast({
+                  title: '提交成功',
+                  icon: 'none',
+                  duration: 500
+                });
+                that.message = '';
+                that.$apply();
+              } else {
+                wx.showToast({
+                  title: '请求失败',
+                  icon: 'none',
+                  duration: 500
+                });
+              }
+            },
+            function(err) {
+              wx.showToast({
+                title: '请求失败' + err,
+                icon: 'none',
+                duration: 500
+              });
+            }
+          );
         } else {
-          this.womannum++;
+          that.$parent.getAuthKey().then(resOpenid => {
+            wx.setStorageSync('openid', res.data.openid);
+            var data = {
+              inopenid: that.inopenid,
+              totalnum: that.peopleNum,
+              message: that.message,
+              outopenid: that.$parent.globalData.userInfo.openid
+            };
+            request(
+              '/userhelp/gethelp',
+              'post',
+              data,
+              '请求中',
+              function(res) {
+                if (res.meta.success) {
+                  wx.showToast({
+                    title: '提交成功',
+                    icon: 'none',
+                    duration: 500
+                  });
+                  that.message = '';
+                  that.$apply();
+                } else {
+                  wx.showToast({
+                    title: '请求失败',
+                    icon: 'none',
+                    duration: 500
+                  });
+                }
+              },
+              function(err) {
+                wx.showToast({
+                  title: '请求失败' + err,
+                  icon: 'none',
+                  duration: 500
+                });
+              }
+            );
+          });
         }
       } else {
+        wx.showToast({
+          title: '文本内容不能为空且openid不能为空',
+          icon: 'none',
+          duration: 1000
+        });
       }
     },
     switchUrl() {
@@ -176,25 +223,38 @@ export default class praise extends wepy.page {
       });
     }
   };
-  getUserInfo(e) {
-    console.log(e);
+  updateNum(options) {
     var that = this;
-    if (e.detail.userInfo) {
-      that.authLogin = false;
-      
-    } else {
-      wx.showModal({
-        title: '警告',
-        content: '您点击了拒绝授权，将无法进入小程序，请授权之后再进入!!!',
-        showCancel: false,
-        confirmText: '返回授权',
-        success: function(res) {
-          if (res.confirm) {
-            console.log('用户点击了“返回授权”');
-          }
+    request(
+      '/userhelp/updatenum',
+      'post',
+      options,
+      '请求中',
+      function(res) {
+        if (res.meta.success) {
+          wx.showToast({
+            title: '点赞成功',
+            icon: 'none',
+            duration: 1000
+          });
+          that.$apply();
+        } else {
+          wx.showToast({
+            title: '助力失败',
+            icon: 'none',
+            duration: 1000
+          });
+          that.$apply();
         }
-      });
-    }
+      },
+      function(err) {
+        wx.showToast({
+          title: '请求失败',
+          icon: 'none',
+          duration: 1000
+        });
+      }
+    );
   }
   getNum(openid) {
     var that = this;
@@ -205,37 +265,36 @@ export default class praise extends wepy.page {
       '请求中',
       function(res) {
         console.log(res);
-        if (res.openid) {
-          that.peopleNum = res.totalNum;
-          that.mannum = res.man;
-          that.womannum = res.woman;
+        if (res.meta.success) {
+          that.peopleNum = res.data.result.totalNum;
           that.$apply();
+        } else {
+          wx.showToast({
+            title: '请求失败',
+            icon: 'none',
+            duration: 1000
+          });
         }
       },
-      function(err) {}
+      function(err) {
+        wx.showToast({
+          title: '请求失败' + err,
+          icon: 'none',
+          duration: 1000
+        });
+      }
     );
   }
   events = {};
   onLoad(options) {
-    this.inopenid = decodeURIComponent(options.openid);
+    console.log(options);
     var that = this;
-    wx.getSetting({
-      success: function(res) {
-        console.log(res);
-        if (res.authSetting['scope.userInfo']) {
-          // 已经授权，可以直接调用 getUserInfo 获取头像昵称
-          that.$parent.getAuthKey().then(resOpenid => {
-            that.authLogin = false;
-            that.$parent.globalData.openid = resOpenid;
-            that.getNum(that.inopenid);
-          });
-          that.$apply();
-        } else {
-          that.authLogin = true;
-          that.$apply();
-        }
-      }
-    });
+
+    // this.inopenid = decodeURIComponent(options.openid);
+    this.inopenid = encodeURIComponent("ox-EU0SaX8P0Y6GCXmNute8p5kuY");
+    if (this.inopenid) {
+      that.getNum(that.inopenid);
+    }
     this.$apply();
   }
 }

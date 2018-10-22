@@ -89,13 +89,23 @@ page {
     }
     .messDetail {
       font: 30rpx/50rpx '';
-      height: 400rpx;
+      height: 200rpx;
       overflow-y: scroll;
       &::-webkit-scrollbar {
         width: 0;
         height: 0;
         color: transparent;
       }
+    }
+    .selectWord {
+      width: 400rpx;
+      height: 80rpx;
+      text-align: center;
+      font: 30rpx/80rpx "";
+      background: #ffdb2f;
+      color: #000;
+      margin: 0 auto;
+      border-radius: 20rpx;
     }
   }
   .canvas-box {
@@ -115,17 +125,9 @@ page {
         <view class="num"><text>你的总助力人数：</text><text>{{totalNum}}</text></view>
         <view class="pro"><progress percent="{{percentNum}}" show-info stroke-width="16" color="#1cd7fe" active="true"/></view>
       </view>
-      <view class="man data">
-        <view class="num"><text>男：</text><text>{{manNum}}</text></view>
-        <view class="pro"><progress percent="{{percentManNum}}" show-info stroke-width="16" color="#1cd7fe" active="true"/></view>
-      </view>
-      <view class="woman data">
-        <view class="num"><text>女：</text><text>{{womanNum}}</text></view>
-        <view class="pro"><progress percent="{{percentWomanNum}}" show-info stroke-width="16" color="#1cd7fe" active="true"/></view>
-      </view>
     </view>
     <view class="mess">
-      <view class="messTitle">在你脱单的路上，你的匿名好友对你说：</view>
+      <view class="messTitle">在你脱单的路上，你的匿名好友对你说：(可以点击留言，选择要生成海报的留言)</view>
       <view class="messList">
         <scroll-view scroll-y style="height:{{oHeight}}px" lower-threshold="100px" bindscrolltolower="lower" enable-back-to-top="true">
           <repeat for="{{messListData}}" key="index" index="index" item="item">
@@ -141,6 +143,7 @@ page {
     <view class="alert" wx:if="{{boxShow}}">
       <view class="closeimg" @tap="closeInfo"><image src="../../img/close.png"/></view>
       <view class="messDetail">{{messDetail}}</view>
+      <view class="selectWord" @tap="selectWord">{{selectMess}}</view>
     </view>
     <view class="canvas-box" wx:if="{{isShowCav}}" >
       <canvas canvas-id="combatCanvas" style="width:{{oWidth}}px;height:{{PHeight}}px"></canvas>
@@ -152,12 +155,9 @@ import wepy from 'wepy';
 import request from '@/utils/request.js';
 export default class assistance extends wepy.page {
   data = {
-    totalNum: "",
+    totalNum: '',
+    selectMess: "选择此留言，生成海报",
     percentNum: 100,
-    percentManNum: "",
-    percentWomanNum: "",
-    manNum: "",
-    womanNum: "",
     messListData: [],
     oHeight: '',
     loadmore: false,
@@ -170,70 +170,80 @@ export default class assistance extends wepy.page {
     boxShow: false,
     messDetail: '',
     rpa: '',
-    PHeight: "",
-    oWidth: "",
-    isShowCav: false
+    PHeight: '',
+    oWidth: '',
+    isShowCav: false,
+    openid: '',
+    words: ""
   };
   components = {};
   methods = {
+    selectWord() {
+      console.log(111)
+      if(this.selectMess=="选择此留言，生成海报") {
+        this.selectMess="已经选择";
+        this.words=this.messDetail;
+      }
+    },
     compose() {
-      var that=this
+      var that = this;
       that.isShowCav = true;
-      console.log(8888)
-          var resPath = '../../img/zhanji.png';
-          //绘制canvas背景图
-          var rpx = that.rpa;
-          const ctx = wx.createCanvasContext('combatCanvas');
-          ctx.drawImage(resPath, 0, 0, that.oWidth, that.PHeight);
-          //绘制文字
-          ctx.setTextAlign('left');
-          ctx.setFontSize(15 * rpx);
-          ctx.fillStyle = '#2a358b';
-          ctx.fillText(`总助力：${that.totalNum}人`, 30 * rpx, 80 * rpx);
-          ctx.fillText(`男：${that.manNum}人`, 30 * rpx, 120 * rpx);
-          ctx.fillText(`女：${that.womanNum}人`, 30 * rpx, 160 * rpx);
-          //绘制进度条
-          ctx.fillStyle = "#fff";  //对画布填充颜色  
-          ctx.fillRect(50* rpx, 90* rpx, 100* rpx, 12* rpx); //fillRect() 方法绘制“已填色”的矩形。默认的填充颜色是黑色。
-          ctx.fillStyle = "#7565e9";  //为将要画的图像设置颜色
-          ctx.fillRect(50* rpx, 9 * rpx,100* rpx,12* rpx);  //图像的坐标以及宽高
-          ctx.strokeRect(50* rpx, 95* rpx,100* rpx,12* rpx); 
-          // //绘制二维码
-          // ctx.save();
-          // ctx.drawImage(res.data, 210 * rpx, 340 * rpx, 140 * rpx, 140 * rpx);
-          // ctx.restore();
-          // ctx.setTextAlign('left');
-          // ctx.setFontSize(15 * rpx);
-          // ctx.fillText(`欢迎扫码`, 250 * rpx, 510 * rpx);
-          // ctx.fillText(`对你的好友说悄悄话`, 210 * rpx, 530 * rpx);
-          // ctx.fillText(`为你的好友脱单点赞`, 210 * rpx, 550 * rpx);
-          ctx.draw();
-          setTimeout(function() {
-            wx.canvasToTempFilePath({
-              canvasId: 'combatCanvas',
-              fileType: 'jpg',
-              success: function(res) {
+      var resPath = '../../img/zhanji.png';
+      //绘制canvas背景图
+      var rpx = that.rpa;
+      const ctx = wx.createCanvasContext('combatCanvas');
+      ctx.drawImage(resPath, 0, 0, that.oWidth, that.PHeight);
+      //绘制文字
+      ctx.setTextAlign('left');
+      ctx.setFontSize(15 * rpx);
+      ctx.fillStyle = '#2a358b';
+      ctx.fillText(`总助力：${that.totalNum}人`, 30 * rpx, 80 * rpx);
+      //绘制进度条
+      ctx.fillStyle = '#884ce4'; //对画布填充颜色
+      ctx.fillRect(40 * rpx, 90 * rpx, 200 * rpx, 24 * rpx); //fillRect() 方法绘制“已填色”的矩形。默认的填充颜色是黑色。
+      ctx.fillStyle = '#2a358b';
+      ctx.fillText(`100%`, 270 * rpx, 110 * rpx);
+      //绘制留言
+      ctx.fillStyle = '#000'; //对画布填充颜色
+      ctx.fillText(`你的好友留言：`,30 * rpx, 350 * rpx);
+       ctx.fillStyle = 'red'; 
+       that.canvasTextAutoLine(`${that.words}`,ctx,30 * rpx, 380 * rpx,30*rpx);
+      // //绘制二维码
+      // ctx.save();
+      // ctx.drawImage(res.data, 210 * rpx, 340 * rpx, 140 * rpx, 140 * rpx);
+      // ctx.restore();
+      // ctx.setTextAlign('left');
+      // ctx.setFontSize(15 * rpx);
+      // ctx.fillText(`欢迎扫码`, 250 * rpx, 510 * rpx);
+      // ctx.fillText(`对你的好友说悄悄话`, 210 * rpx, 530 * rpx);
+      // ctx.fillText(`为你的好友脱单点赞`, 210 * rpx, 550 * rpx);
+      ctx.draw();
+      setTimeout(function() {
+        wx.canvasToTempFilePath({
+          canvasId: 'combatCanvas',
+          fileType: 'jpg',
+          success: function(res) {
+            console.log(res);
+            wx.saveImageToPhotosAlbum({
+              filePath: res.tempFilePath,
+              success(res) {
                 console.log(res);
-                wx.saveImageToPhotosAlbum({
-                  filePath: res.tempFilePath,
-                  success(res) {
-                    console.log(res);
-                    wx.hideLoading();
-                    wx.showToast({
-                      title: '保存成功'
-                    });
-                  },
-                  fail(err) {
-                    console.log(err);
-                    wx.hideLoading();
-                  }
+                wx.hideLoading();
+                wx.showToast({
+                  title: '保存成功'
                 });
               },
-              fail: function(err) {
-                console.log(err)
+              fail(err) {
+                console.log(err);
+                wx.hideLoading();
               }
             });
-          }, 500);
+          },
+          fail: function(err) {
+            console.log(err);
+          }
+        });
+      }, 500);
     },
     toDetail(mess) {
       this.messDetail = mess;
@@ -248,7 +258,7 @@ export default class assistance extends wepy.page {
     console.log(e);
     if (!this.params.end) {
       that.loadmore = true;
-      that.getMessList(this.$parent.globalData.openid);
+      that.getMessList(this.openid);
     }
   }
   getNumDetail(openid) {
@@ -260,19 +270,9 @@ export default class assistance extends wepy.page {
       '请求中',
       function(res) {
         console.log(res);
-        if (res.length != 0) {
-          that.totalNum = res[0].totalNum;
-          that.manNum = res[0].man;
-          that.womanNum = res[0].woman;
-          that.percentManNum = that.manNum / that.totalNum * 100;
-          that.percentWomanNum = (1 - that.manNum / that.totalNum) * 100;
+        if (res.meta.success) {
+          that.totalNum = res.data.result.totalNum;
           that.$apply();
-        } else if (res == '') {
-          wx.showToast({
-            title: '暂无好友助你脱单',
-            icon: 'none',
-            duration: 500
-          });
         } else {
           wx.showToast({
             title: '获取数据失败',
@@ -289,14 +289,17 @@ export default class assistance extends wepy.page {
   getMessList(openid) {
     var that = this;
     request(
-      '/userhelp/gethelpdata',
+      `/userhelp/gethelpdata?page=${that.params.pageNum}&pagesize=${that.params.pageSize}`,
       'post',
       { openid: openid },
       '请求中',
       function(res) {
         console.log(res);
-        if (res.length != 0) {
-          let messlist = res;
+        if (res.meta.success) {
+          let messlist = res.data.result;
+          if(res.data.result.length==0) {
+            that.words="你的好友暂未给你留言,塾小乐给你留言了,祝你心想事成,早日找到心仪对象";
+          } 
           messlist.forEach((order, i) => {
             that.messListData.push(order);
           });
@@ -308,12 +311,6 @@ export default class assistance extends wepy.page {
           } else {
             that.params.pageNum++;
           }
-        } else if (res == '') {
-          wx.showToast({
-            title: '暂无数据',
-            icon: 'none',
-            duration: 500
-          });
         } else {
           wx.showToast({
             title: '获取数据失败',
@@ -331,20 +328,26 @@ export default class assistance extends wepy.page {
   events = {};
   onLoad() {
     var that = this;
-    that.$parent.getAuthKey().then(resOpenid => {
-      that.getMessList(resOpenid);
-      that.getNumDetail(resOpenid);
-    });
+    if (wx.getStorageSync('openid')) {
+      that.openid = wx.getStorageSync('openid');
+      that.getMessList(that.openid);
+      that.getNumDetail(that.openid);
+    } else {
+      that.$parent.getAuthKey().then(resOpenid => {
+        that.getMessList(resOpenid);
+        that.getNumDetail(resOpenid);
+      });
+    }
     try {
       var res = wx.getSystemInfoSync();
-      this.PHeight=res.windowHeight;
+      this.PHeight = res.windowHeight;
       this.oHeight = res.windowHeight - 330;
       this.oWidth = res.windowWidth;
       this.rpa = res.windowWidth / 375;
-      this.$apply();
     } catch (e) {
       // Do something when catch error
     }
+    this.$apply();
   }
 }
 </script>
