@@ -272,12 +272,13 @@ export default class poster extends wepy.page {
   handlePoster() {
     var that = this;
     var options = {
-      width: 260,
-      path: `pages/praise/index?openid=${that.openid}`
+      "width": 260,
+      "path": `pages/praise/index?openid=${that.openid}`,
+      "is_hyaline": true
     };
     request(
       '/qrcode',
-      'get',
+      'post',
       options,
       '请求中',
       function(res) {

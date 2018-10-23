@@ -91,6 +91,9 @@ page {
       font: 30rpx/50rpx '';
       height: 200rpx;
       overflow-y: scroll;
+      width: 440rpx;
+      word-wrap:break-word;
+      box-sizing: border-box;
       &::-webkit-scrollbar {
         width: 0;
         height: 0;
@@ -129,7 +132,7 @@ page {
     <view class="mess">
       <view class="messTitle">在你脱单的路上，你的匿名好友对你说：(可以点击留言，选择要生成海报的留言)</view>
       <view class="messList">
-        <scroll-view scroll-y style="height:{{oHeight}}px" lower-threshold="100px" bindscrolltolower="lower" enable-back-to-top="true">
+        <scroll-view scroll-y style="height:{{oHeight}}px" lower-threshold="10px" bindscrolltolower="lower" enable-back-to-top="true">
           <repeat for="{{messListData}}" key="index" index="index" item="item">
             <view class="messListBody" @tap="toDetail({{item.message}})">{{index}}-{{item.message}}</view>
           </repeat>
@@ -179,7 +182,6 @@ export default class assistance extends wepy.page {
   components = {};
   methods = {
     selectWord() {
-      console.log(111)
       if(this.selectMess=="选择此留言，生成海报") {
         this.selectMess="已经选择";
         this.words=this.messDetail;
@@ -188,7 +190,19 @@ export default class assistance extends wepy.page {
     compose() {
       var that = this;
       that.isShowCav = true;
-      var resPath = '../../img/zhanji.png';
+      var options = {
+      "width": 260,
+      "path": `pages/auth/index?openid=${that.openid}`,
+      "is_hyaline": true
+    };
+    request(
+      '/qrcode/qrcodeindex',
+      'post',
+      options,
+      '请求中',
+      function(res) {
+        if (res.meta.success) {
+          var resPath = '../../img/zhanji.png';
       //绘制canvas背景图
       var rpx = that.rpa;
       const ctx = wx.createCanvasContext('combatCanvas');
@@ -197,7 +211,7 @@ export default class assistance extends wepy.page {
       ctx.setTextAlign('left');
       ctx.setFontSize(15 * rpx);
       ctx.fillStyle = '#2a358b';
-      ctx.fillText(`总助力：${that.totalNum}人`, 30 * rpx, 80 * rpx);
+      ctx.fillText(`为你点赞人数：${that.totalNum}人`, 30 * rpx, 80 * rpx);
       //绘制进度条
       ctx.fillStyle = '#884ce4'; //对画布填充颜色
       ctx.fillRect(40 * rpx, 90 * rpx, 200 * rpx, 24 * rpx); //fillRect() 方法绘制“已填色”的矩形。默认的填充颜色是黑色。
@@ -206,17 +220,56 @@ export default class assistance extends wepy.page {
       //绘制留言
       ctx.fillStyle = '#000'; //对画布填充颜色
       ctx.fillText(`你的好友留言：`,30 * rpx, 350 * rpx);
-       ctx.fillStyle = 'red'; 
-       that.canvasTextAutoLine(`${that.words}`,ctx,30 * rpx, 380 * rpx,30*rpx);
-      // //绘制二维码
-      // ctx.save();
-      // ctx.drawImage(res.data, 210 * rpx, 340 * rpx, 140 * rpx, 140 * rpx);
-      // ctx.restore();
-      // ctx.setTextAlign('left');
-      // ctx.setFontSize(15 * rpx);
-      // ctx.fillText(`欢迎扫码`, 250 * rpx, 510 * rpx);
-      // ctx.fillText(`对你的好友说悄悄话`, 210 * rpx, 530 * rpx);
-      // ctx.fillText(`为你的好友脱单点赞`, 210 * rpx, 550 * rpx);
+       ctx.fillStyle = '#b92501';
+      //留言换行
+    var text = that.words;
+    var chr =text.split("");//这个方法是将一个字符串分割成字符串数组
+    var temp = "";
+    var row = [];
+    for (var a = 0; a < chr.length; a++) {
+      if (ctx.measureText(temp).width < 250) {
+        temp += chr[a];
+      }
+      else {
+        a--; //这里添加了a-- 是为了防止字符丢失，效果图中有对比
+        row.push(temp);
+        temp = "";
+      }
+    }
+    row.push(temp); 
+
+    //如果数组长度大于2 则截取前两个
+    if (row.length > 2) {
+      var rowCut = row.slice(0, 2);
+      var rowPart = rowCut[1];
+      var test = "";
+      var empty = [];
+      for (var a = 0; a < rowPart.length; a++) {
+        if (ctx.measureText(test).width < that.oWidth-30) {
+          test += rowPart[a];
+        }
+        else {
+          break;
+        }
+      }
+      empty.push(test);
+      var group = empty[0] + "..."//这里只显示两行，超出的用...表示
+      rowCut.splice(1, 1, group);
+      row = rowCut;
+    }
+    for (var b = 0; b < row.length; b++) {
+      ctx.fillText(row[b], 30*rpx  , 380 *rpx+ b* 20*rpx);
+    }
+    
+      //绘制二维码
+      ctx.save();
+      ctx.drawImage(res.data.imgurl, 100 * rpx, 410 * rpx, 140 * rpx, 140 * rpx);
+      ctx.restore();
+      ctx.setTextAlign('left');
+      ctx.setFontSize(15 * rpx);
+      ctx.fillStyle = '#000'; 
+      ctx.fillText(`欢迎扫码一起玩脱单心里话`, 80 * rpx, 570 * rpx);
+      ctx.fillText(`对你的好友说悄悄话`, 100 * rpx, 590 * rpx);
       ctx.draw();
       setTimeout(function() {
         wx.canvasToTempFilePath({
@@ -244,6 +297,19 @@ export default class assistance extends wepy.page {
           }
         });
       }, 500);
+        }else {
+          wx.showToast({
+            title: '系统错误'
+          });
+        }
+      },
+      function(err) {
+        wx.showToast({
+          title: '系统错误'+err
+        });
+      }
+    );
+      
     },
     toDetail(mess) {
       this.messDetail = mess;
@@ -253,14 +319,7 @@ export default class assistance extends wepy.page {
       this.boxShow = false;
     }
   };
-  lower(e) {
-    var that = this;
-    console.log(e);
-    if (!this.params.end) {
-      that.loadmore = true;
-      that.getMessList(this.openid);
-    }
-  }
+  
   getNumDetail(openid) {
     var that = this;
     request(
@@ -285,6 +344,14 @@ export default class assistance extends wepy.page {
         console.log(err);
       }
     );
+  }
+  lower(e) {
+    var that = this;
+    console.log(e);
+    if (!this.params.end) {
+      that.loadmore = true;
+      that.getMessList(this.openid);
+    }
   }
   getMessList(openid) {
     var that = this;
@@ -334,6 +401,7 @@ export default class assistance extends wepy.page {
       that.getNumDetail(that.openid);
     } else {
       that.$parent.getAuthKey().then(resOpenid => {
+        that.openid =resOpenid;
         that.getMessList(resOpenid);
         that.getNumDetail(resOpenid);
       });
