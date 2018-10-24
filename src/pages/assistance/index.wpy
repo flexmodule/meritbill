@@ -220,7 +220,7 @@ export default class assistance extends wepy.page {
       //绘制留言
       ctx.fillStyle = '#000'; //对画布填充颜色
       ctx.fillText(`你的好友留言：`,30 * rpx, 350 * rpx);
-       ctx.fillStyle = '#b92501';
+       ctx.fillStyle = '#2a358b';
       //留言换行
     var text = that.words;
     var chr =text.split("");//这个方法是将一个字符串分割成字符串数组

@@ -68,7 +68,6 @@ page {
     <view class="main">
       <navigator class="data" url="/pages/assistance/index" hover-class="none"><image src="../../img/detail.png" class="img"/><text>我的脱单助力表</text><image class="arrow" src="../../img/right.png"/></navigator>
       <navigator class="data" url="/pages/linktous/index" hover-class="none"><image src="../../img/tel.png" class="img"/><text>联系我们(商务合作)</text><image class="arrow" src="../../img/right.png"/></navigator>
-      <navigator class="data" url="/pages/praise/index" hover-class="none"><image src="../../img/tel.png" class="img"/><text>联系我们(商务合作)</text><image class="arrow" src="../../img/right.png"/></navigator>
     </view>
     <view class="complain" ><navigator url="/pages/complain/index" hover-class="navigator-hover">投诉与建议</navigator></view>
   </view>
