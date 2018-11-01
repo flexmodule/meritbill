@@ -160,6 +160,7 @@ export default class home extends wepy.page {
     }
   }
   onLoad() {
+    wx.showShareMenu();
     var res = wx.getSystemInfoSync();
     this.openid = wx.getStorageSync('openid');
     this.oHeight = res.windowHeight + 'px';

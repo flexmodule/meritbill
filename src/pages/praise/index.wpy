@@ -289,12 +289,11 @@ export default class praise extends wepy.page {
   onLoad(options) {
     console.log(options);
     var that = this;
-
-    // this.inopenid = decodeURIComponent(options.openid);
-    this.inopenid = encodeURIComponent("ox-EU0SaX8P0Y6GCXmNute8p5kuY");
-    if (this.inopenid) {
+    if (options.openid) {
+      this.inopenid = decodeURIComponent(options.openid);
       that.getNum(that.inopenid);
     }
+    wx.showShareMenu();
     this.$apply();
   }
 }

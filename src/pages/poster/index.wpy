@@ -145,7 +145,8 @@ export default class poster extends wepy.page {
     canIUse: wx.canIUse('button.open-type.openSetting'),
     getAuth: false,
     advans: [
-      { name: '会画画', value: '会画画' },
+      { name: '没有任何优点', value: '无优点' },
+      { name: '会那麽点画画', value: '会画画' },
       { name: '会弹吉他', value: '会弹吉他' },
       { name: '空手道黑带', value: '空手道黑带' },
       { name: '演讲能力强', value: '演讲能力强' },
@@ -155,9 +156,9 @@ export default class poster extends wepy.page {
       { name: '做事谨慎,不盲目', value: '做事谨慎,不盲目' },
       { name: '大方，不拘谨', value: '大方，不拘谨' },
       { name: '善良', value: '善良' },
-      { name: '贤惠', value: '贤惠' },
+      { name: '温柔贤惠', value: '温柔贤惠' },
       { name: '会打篮球', value: '会打篮球' },
-      { name: '会打乒乓球', value: '会打乒乓球' }
+      { name: '会打乒乓球', value: '会打乒乓球'}
     ],
     oHeight: '',
     oWidth: '',
@@ -430,6 +431,7 @@ export default class poster extends wepy.page {
     } catch (e) {
       // Do something when catch error
     }
+    wx.showShareMenu();
     this.$apply();
   }
 }

@@ -126,7 +126,7 @@ export default class home extends wepy.page {
   
   events = {};
   onLoad() {
-    
+    wx.showShareMenu();
   }
 }
 </script>

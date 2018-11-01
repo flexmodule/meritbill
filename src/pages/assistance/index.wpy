@@ -395,6 +395,7 @@ export default class assistance extends wepy.page {
   events = {};
   onLoad() {
     var that = this;
+    wx.showShareMenu();
     if (wx.getStorageSync('openid')) {
       that.openid = wx.getStorageSync('openid');
       that.getMessList(that.openid);

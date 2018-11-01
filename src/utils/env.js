@@ -13,7 +13,7 @@ let authUrl;
 let baseUrl2;
 const imgBaseUrl = 'https://fuss10.elemecdn.com';
 let regOpen;
-baseUrl = 'http://139.199.201.128';
+baseUrl = 'https://maiyou.xyz';
 routerMode = 'hash'
 authUrl = 'http://uat.sssyin.cn/tour/static/tour.html';
 regOpen = true;

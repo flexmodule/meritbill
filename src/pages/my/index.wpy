@@ -83,7 +83,7 @@ export default class my extends wepy.page {
   events = {};
   onLoad() {
     var that = this;
- 
+    wx.showShareMenu();
   }
 }
 </script>

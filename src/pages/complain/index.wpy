@@ -223,6 +223,8 @@ export default class complain extends wepy.page {
     }
   };
   events = {};
-  onLoad() {}
+  onLoad() {
+    wx.showShareMenu();
+  }
 }
 </script>
