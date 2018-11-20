@@ -69,7 +69,7 @@ page {
     </view>
     <view class="messTo">
       <view class="messToTitle">
-        <view class="messToTitle-t">在她/他脱单的路上,你想对他/她说:</view>
+        <view class="messToTitle-t">你想对他/她说:</view>
       </view>
       <textarea maxlength="100" placeholder="最多输入50字(不能为空)" value="{{message}}" @input="getMess"/>
       <view class="info">温馨提示：大胆放心的说,本平台全是匿名留言,对方不知道你是谁,只知道留言的内容</view>

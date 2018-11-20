@@ -112,7 +112,7 @@ page {
   <view class="poster">
     <view class="headimg"><view class="userinfo-avatar"><open-data type="userAvatarUrl"></open-data></view></view>
     <view class="main">
-      <view class="title">请选择您脱单的实力：</view>
+      <view class="title">请选择符合您的标签：</view>
       <view class="advan">
         <checkbox-group bindchange="advanChange">
           <label class="checkbox" wx:for="{{advans}}" wx:key="{{item.name}}">
@@ -122,7 +122,7 @@ page {
       </view>
     </view>
     <view class="footer">
-      <view class="footer-b"  @tap="makePoster">生成海报,show实力,win脱单</view>
+      <view class="footer-b"  @tap="makePoster">生成海报,show标签,win脱单</view>
     </view>
     <view class="canvas-box" wx:if="{{isShowCav}}" >
       <canvas canvas-id="shareCanvas" style="width:{{oWidth}}px;height:{{oHeight}}px"></canvas>
@@ -145,20 +145,50 @@ export default class poster extends wepy.page {
     canIUse: wx.canIUse('button.open-type.openSetting'),
     getAuth: false,
     advans: [
-      { name: '没有任何优点', value: '无优点' },
-      { name: '会那麽点画画', value: '会画画' },
-      { name: '会弹吉他', value: '会弹吉他' },
-      { name: '空手道黑带', value: '空手道黑带' },
-      { name: '演讲能力强', value: '演讲能力强' },
-      { name: '会做饭', value: '会做饭' },
-      { name: '工作努力', value: '工作努力' },
-      { name: '有梦想，有抱负', value: '有梦想，有抱负' },
-      { name: '做事谨慎,不盲目', value: '做事谨慎,不盲目' },
-      { name: '大方，不拘谨', value: '大方，不拘谨' },
-      { name: '善良', value: '善良' },
-      { name: '温柔贤惠', value: '温柔贤惠' },
-      { name: '会打篮球', value: '会打篮球' },
-      { name: '会打乒乓球', value: '会打乒乓球'}
+      { name: '性别-♀', value: '性别-♀' },
+      { name: '性别-♂', value: '性别-♂' },
+      { name: '年龄--∞——永远年轻', value: '年龄--∞——永远年轻' },
+      { name: '工作-脱发而不脱单的IT民工', value: '工作-脱发而不脱单的IT民工' },
+      { name: '工作-小喽喽', value: '工作-小喽喽' },
+      { name: '工作-大boss', value: '工作-大boss'},
+      { name: '小清新', value: '小清新' },
+      { name: '动漫控', value: '动漫控' },
+      { name: '抖音圈最帅', value: '抖音圈最帅' },
+      { name: '宇宙无敌帅', value: '宇宙无敌帅' },
+      { name: '男神', value: '男神' },
+      { name: '女神', value: '女神' },
+      { name: '篮球', value: '篮球'},
+      { name: '逛街', value: '逛街'},
+      { name: '品茶', value: '品茶'},
+      { name: '绘画', value: '绘画'},
+      { name: '烘培', value: '烘培'},
+      { name: '选择恐惧症', value: '选择恐惧症'},
+      { name: '密集恐惧症', value: '密集恐惧症'},
+      { name: '通宵熬夜看剧', value: '通宵熬夜看剧'},
+      { name: 'love音乐', value: 'love音乐' },
+      { name: '天然呆', value: '天然呆' },
+      { name: '民谣范', value: '民谣范' },
+      { name: '吉他,尤克里里', value: '吉他,尤克里里' },
+      { name: '摇滚迷', value: '摇滚迷' },
+      { name: '轻音乐', value: '轻音乐' },
+      { name: '美剧狂', value: '美剧狂' },
+      { name: '眼镜男', value: '眼镜男' },
+      { name: '大叔', value: '大叔' },
+      { name: '肌肉man', value: '肌肉man' },
+      { name: '话痨', value: '话痨' },
+      { name: '电影达人', value: '电影达人' },
+      { name: '长腿欧巴', value: '长腿欧巴' },
+      { name: '夜猫子', value: '夜猫子' },
+      { name: '游戏狂魔', value: '游戏狂魔' },
+      { name: '背包客', value: '背包客'},
+      { name: '穷游党', value: '穷游党'},
+      { name: '懒到无药可救', value: '懒到无药可救'},
+      { name: '逗比一枚', value: '逗比一枚' },
+      { name: '吃货一枚', value: '吃货一枚' },
+      { name: '吃饱此有力气减肥', value: '吃饱此有力气减肥'},
+      { name: '咸鱼一枚', value: '咸鱼一枚' },
+      { name: '优点——缺点没有,不知道说哪一条', value: '优点——缺点没有,不知道说哪一条' },
+      { name: '缺点——优点太多,不知道选哪一条', value: '缺点——优点太多,不知道选哪一条' },
     ],
     oHeight: '',
     oWidth: '',
@@ -315,9 +345,9 @@ export default class poster extends wepy.page {
           // 轻微模糊阴影
           ctx.shadowBlur = 8 * rpx;
           ctx.fillText(`哈哈,我是${that.name}`, 50 * rpx, 50 * rpx);
-          ctx.fillText(`我有以下优点！！！`, 90 * rpx, 75 * rpx);
-          ctx.fillText(`在我脱单的路上,你们`, 70 * rpx, 100 * rpx);
-          ctx.fillText(`有什么建议或心里话要对我说...`, 35 * rpx, 125 * rpx);
+          ctx.fillText(`我有以下标签！！！`, 92 * rpx, 75 * rpx);
+          ctx.fillText(`我想脱单,你们`, 75 * rpx, 100 * rpx);
+          ctx.fillText(`有啥想说的,扫码对我说,hah...`, 35 * rpx, 125 * rpx);
           let contentArray = that.advansList;
           ctx.shadowOffsetX = 0;
           ctx.shadowOffsetY = 0;
@@ -343,7 +373,7 @@ export default class poster extends wepy.page {
           //绘制优点
           ctx.setTextAlign('left');
           ctx.setFontSize(15 * rpx);
-          ctx.fillText(`show你脱单的实力:`, 16 * rpx, 450 * rpx);
+          ctx.fillText(`show我的标签:`, 16 * rpx, 450 * rpx);
           //绘制二维码
           ctx.save();
           ctx.drawImage(res.data.imgurl, 210 * rpx, 340 * rpx, 140 * rpx, 140 * rpx);

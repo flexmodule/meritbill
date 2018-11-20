@@ -91,7 +91,7 @@ page {
     <view class="homeback"><image src="../../img/homeback.png"/></view>
     <view class="main">
       <view class="info" @tap="lookInfo">使用说明(点击可查看)</view>
-      <view class="sellAdvan"><navigator class="data" url="/pages/poster/index" hover-class="none">我要秀秀优点,生成海报</navigator></view>
+      <view class="sellAdvan"><navigator class="data" url="/pages/poster/index" hover-class="none">我要选择标签,生成海报</navigator></view>
     </view>
     <view class="shadow" wx:if="{{infoTextShow}}">
       <view class="infoText">
